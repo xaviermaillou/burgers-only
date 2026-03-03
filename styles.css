@@ -1,0 +1,265 @@
+:root {
+  --accent: #00a4ef;
+  --tile-ink: #ffffff;
+  --tile-ink-muted: rgba(255, 255, 255, 0.86);
+  --gap: 18px;
+  --cols: 2;
+  --header-top: calc(env(safe-area-inset-top, 0px) + 10px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Barlow", "Segoe UI", sans-serif;
+  background: #ffffff;
+  color: #111111;
+}
+
+.app-shell {
+  width: 100%;
+  min-height: 100vh;
+  padding: calc(env(safe-area-inset-top, 0px) + 74px) 20px 104px;
+  background: #ffffff;
+}
+
+.topbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 0;
+  position: fixed;
+  top: var(--header-top);
+  left: 20px;
+  right: 20px;
+  z-index: 40;
+  background: transparent;
+  padding: 0;
+  border-bottom: 0;
+}
+
+.location-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+  transition: opacity 260ms ease;
+}
+
+body.geotag-hidden .location-wrap {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.location-text {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.05;
+  font-weight: 400;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+}
+
+.pin-icon {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #111111;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: inline-block;
+}
+
+.menu-btn {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  width: 40px;
+  height: 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  position: fixed;
+  top: var(--header-top);
+  right: 20px;
+  z-index: 60;
+}
+
+.menu-line {
+  width: 26px;
+  background: #111111;
+  display: block;
+}
+
+.menu-btn .menu-line:nth-child(1) {
+  height: 7px;
+  border-radius: 999px 999px 12px 12px;
+}
+
+.menu-btn .menu-line:nth-child(2) {
+  width: 26px;
+  height: 5px;
+  border-radius: 3px;
+}
+
+.menu-btn .menu-line:nth-child(3) {
+  height: 6px;
+  border-radius: 12px 12px 999px 999px;
+}
+
+.view {
+  display: none;
+  padding-top: 12px;
+}
+
+.view.active {
+  display: block;
+}
+
+.metro-grid {
+  width: 100%;
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  container-type: inline-size;
+}
+
+.tile {
+  border: 4px solid #111111;
+  background: #ffffff;
+  color: #111111;
+  box-shadow: 6px 6px 0 0 #111111;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  position: relative;
+  z-index: 20;
+}
+
+.tile-1x1 {
+  grid-column: span 1;
+  aspect-ratio: 1 / 1;
+}
+
+.tile-2x1 {
+  grid-column: span 2;
+  height: calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols));
+}
+
+.tile-2x2 {
+  grid-column: span 2;
+  aspect-ratio: 1 / 1;
+}
+
+.tile-kicker {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #333333;
+}
+
+.tile-title {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+  line-height: 0.92;
+  font-weight: 600;
+}
+
+.restaurant-tile .tile-kicker {
+  letter-spacing: 0.08em;
+}
+
+.recipe-tile .tile-kicker {
+  letter-spacing: 0.04em;
+}
+
+.restaurant-tile {
+  box-shadow: 6px 6px 0 0 #f28c1b;
+}
+
+.recipe-tile {
+  box-shadow: 6px 6px 0 0 #f05aa6;
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 80;
+  border-top: 1px solid #d5d5d5;
+  background: #ffffff;
+  display: flex;
+  justify-content: flex-start;
+  gap: 22px;
+  padding: 10px 14px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  overflow: hidden;
+}
+
+.nav-item {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  overflow: visible;
+  position: relative;
+  text-align: left;
+  width: fit-content;
+  display: flex;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+}
+
+.nav-label {
+  display: inline-block;
+  font-size: clamp(2.2rem, 7.2vw, 3.4rem);
+  line-height: 0.8;
+  text-transform: lowercase;
+  letter-spacing: -0.01em;
+  font-weight: 300;
+  color: #8a8a8a;
+  transform: none;
+  white-space: nowrap;
+  transition: color 260ms ease, opacity 260ms ease;
+  opacity: 0.72;
+}
+
+.nav-item.active .nav-label {
+  color: #1a1a1a;
+  font-weight: 300;
+  opacity: 1;
+}
+
+@media (min-width: 600px) {
+  :root {
+    --cols: 3;
+  }
+}
+
+@media (min-width: 900px) {
+  :root {
+    --cols: 4;
+  }
+
+  .nav-label {
+    font-size: clamp(1.7rem, 2.1vw, 2.2rem);
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --cols: 5;
+  }
+}

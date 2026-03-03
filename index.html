@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Burger Tiles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="location-wrap">
+        <span class="icon pin-icon" aria-hidden="true"></span>
+        <p class="location-text">Kirchberg, Luxembourg</p>
+      </div>
+    </header>
+    <button class="menu-btn" aria-label="Menu">
+      <span class="menu-line"></span>
+      <span class="menu-line"></span>
+      <span class="menu-line"></span>
+    </button>
+
+    <main>
+      <section id="restaurantsView" class="view active" aria-label="Restaurants">
+        <div id="restaurantList" class="metro-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="recipesView" class="view" aria-label="Recettes">
+        <div id="recipeList" class="metro-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navigation principale">
+      <button class="nav-item active" data-view-target="restaurantsView" aria-current="page">
+        <span class="nav-label">Restaurants</span>
+      </button>
+      <button class="nav-item" data-view-target="recipesView">
+        <span class="nav-label">Recettes</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
