@@ -4,7 +4,7 @@
   --tile-ink-muted: rgba(255, 255, 255, 0.86);
   --gap: 18px;
   --cols: 2;
-  --header-top: calc(env(safe-area-inset-top, 0px) + 10px);
+  --header-top: calc(env(safe-area-inset-top, 0px) + 18px);
 }
 
 * {
@@ -13,7 +13,7 @@
 
 body {
   margin: 0;
-  font-family: "Barlow", "Segoe UI", sans-serif;
+  font-family: "Segoe UI", sans-serif;
   background: #ffffff;
   color: #111111;
 }
@@ -21,7 +21,7 @@ body {
 .app-shell {
   width: 100%;
   min-height: 100vh;
-  padding: calc(env(safe-area-inset-top, 0px) + 74px) 20px 104px;
+  padding: calc(env(safe-area-inset-top, 0px) + 90px) 20px 104px;
   background: #ffffff;
 }
 
@@ -57,19 +57,21 @@ body.geotag-hidden .location-wrap {
 
 .location-text {
   margin: 0;
-  font-size: 1.6rem;
+  font-size: 1.45rem;
   line-height: 1.05;
   font-weight: 400;
   white-space: normal;
   overflow: visible;
   text-overflow: clip;
   word-break: break-word;
+  color: #111111;
+  transform: translateY(3px);
 }
 
 .pin-icon {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #111111;
+  width: 21px;
+  height: 21px;
+  border: 3px solid #111111;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   display: inline-block;
@@ -85,23 +87,26 @@ body.geotag-hidden .location-wrap {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   padding: 0;
   position: fixed;
   top: var(--header-top);
   right: 20px;
-  z-index: 60;
+  z-index: 120;
+  transition: opacity 180ms ease;
 }
 
 .menu-line {
   width: 26px;
   background: #111111;
   display: block;
+  transition: transform 240ms ease, opacity 180ms ease, width 240ms ease, border-radius 240ms ease;
+  transform-origin: center;
 }
 
 .menu-btn .menu-line:nth-child(1) {
   height: 7px;
-  border-radius: 999px 999px 12px 12px;
+  border-radius: 50% 50% 1px 1px;
 }
 
 .menu-btn .menu-line:nth-child(2) {
@@ -112,16 +117,66 @@ body.geotag-hidden .location-wrap {
 
 .menu-btn .menu-line:nth-child(3) {
   height: 6px;
-  border-radius: 12px 12px 999px 999px;
+  border-radius: 1px 1px 50% 50%;
+}
+
+.menu-btn[aria-expanded="true"] .menu-line:nth-child(1) {
+  height: 4px;
+  transform: translateY(9px) rotate(45deg);
+  border-radius: 999px;
+}
+
+.menu-btn[aria-expanded="true"] .menu-line:nth-child(2) {
+  opacity: 0;
+  width: 14px;
+}
+
+.menu-btn[aria-expanded="true"] .menu-line:nth-child(3) {
+  height: 4px;
+  transform: translateY(-9px) rotate(-45deg);
+  border-radius: 999px;
+}
+
+.views-viewport {
+  overflow: hidden;
+}
+
+.views-track {
+  --view-index: 0;
+  display: flex;
+  width: 100%;
+  transform: translate3d(calc(var(--view-index) * -100%), 0, 0);
+  transition: transform 340ms cubic-bezier(0.15, 0.7, 0.2, 1);
+  will-change: transform;
 }
 
 .view {
-  display: none;
+  flex: 0 0 100%;
+  min-width: 0;
   padding-top: 12px;
+  padding-right: 8px;
+  padding-bottom: 8px;
+  overflow: hidden;
 }
 
-.view.active {
-  display: block;
+.info-list {
+  display: grid;
+  gap: 18px;
+  padding: 4px 0 10px;
+}
+
+.info-article h3 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  line-height: 0.92;
+  font-weight: 600;
+}
+
+.info-article p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+  color: #2f2f2f;
 }
 
 .metro-grid {
@@ -200,13 +255,31 @@ body.geotag-hidden .location-wrap {
   bottom: 0;
   width: 100%;
   z-index: 80;
-  border-top: 1px solid #d5d5d5;
+  border-top: 0;
   background: #ffffff;
+  overflow: hidden;
+}
+
+.bottom-nav::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 34px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #ffffff 88%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bottom-nav-track {
   display: flex;
   justify-content: flex-start;
   gap: 22px;
-  padding: 10px 14px calc(env(safe-area-inset-bottom, 0px) + 12px);
-  overflow: hidden;
+  width: max-content;
+  padding: 16px 22px calc(env(safe-area-inset-bottom, 0px) + 14px);
+  position: relative;
+  z-index: 1;
 }
 
 .nav-item {
@@ -224,7 +297,7 @@ body.geotag-hidden .location-wrap {
 
 .nav-label {
   display: inline-block;
-  font-size: clamp(2.2rem, 7.2vw, 3.4rem);
+  font-size: clamp(2.3rem, 5.2vw, 2.95rem);
   line-height: 0.8;
   text-transform: lowercase;
   letter-spacing: -0.01em;
@@ -238,7 +311,6 @@ body.geotag-hidden .location-wrap {
 
 .nav-item.active .nav-label {
   color: #1a1a1a;
-  font-weight: 300;
   opacity: 1;
 }
 
@@ -252,14 +324,92 @@ body.geotag-hidden .location-wrap {
   :root {
     --cols: 4;
   }
-
-  .nav-label {
-    font-size: clamp(1.7rem, 2.1vw, 2.2rem);
-  }
 }
 
 @media (min-width: 1200px) {
   :root {
     --cols: 5;
   }
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
+body.menu-open main,
+body.menu-open .topbar {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.options-menu {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 240ms ease, visibility 240ms ease;
+  padding: calc(env(safe-area-inset-top, 0px) + 20px) 20px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  isolation: isolate;
+}
+
+.options-menu.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.options-panel {
+  border: 0;
+  background: #ffffff;
+  min-height: 100%;
+  padding: 18px 16px;
+  transform: translateY(-12px) scale(0.92);
+  transform-origin: top right;
+  opacity: 0;
+  transition: transform 260ms ease, opacity 220ms ease;
+}
+
+.options-menu.open .options-panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.options-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  padding: 12px 0;
+  font-size: 1.15rem;
+  font-weight: 400;
+}
+
+.option-row input {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #111111;
+  border-radius: 0;
+  background: #ffffff;
+  display: inline-grid;
+  place-content: center;
+  margin: 0;
+}
+
+.option-row input:checked {
+  background: #111111;
+}
+
+.option-row input:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
 }

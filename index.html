@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Burger Tiles</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <title>BurgersOnly</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -17,29 +14,51 @@
         <p class="location-text">Kirchberg, Luxembourg</p>
       </div>
     </header>
-    <button class="menu-btn" aria-label="Menu">
+    <button class="menu-btn" aria-label="Ouvrir les options burgers" aria-controls="optionsMenu" aria-expanded="false">
       <span class="menu-line"></span>
       <span class="menu-line"></span>
       <span class="menu-line"></span>
     </button>
 
-    <main>
-      <section id="restaurantsView" class="view active" aria-label="Restaurants">
-        <div id="restaurantList" class="metro-grid" aria-live="polite"></div>
-      </section>
+    <aside id="optionsMenu" class="options-menu" aria-hidden="true">
+      <div class="options-panel">        <form class="options-form">
+          <label class="option-row"><input type="checkbox" name="burger_option" value="sans-gluten" />Sans gluten</label>
+          <label class="option-row"><input type="checkbox" name="burger_option" value="sans-lactose" />Sans lactose</label>
+          <label class="option-row"><input type="checkbox" name="burger_option" value="halal" />Halal</label>
+          <label class="option-row"><input type="checkbox" name="burger_option" value="kasher" />Kasher</label>
+          <label class="option-row"><input type="checkbox" name="burger_option" value="vegan" />Vegan</label>
+        </form>
+      </div>
+    </aside>
 
-      <section id="recipesView" class="view" aria-label="Recettes">
-        <div id="recipeList" class="metro-grid" aria-live="polite"></div>
-      </section>
+    <main class="views-viewport">
+      <div class="views-track">
+        <section id="restaurantsView" class="view active" aria-label="Restaurants">
+          <div id="restaurantList" class="metro-grid" aria-live="polite"></div>
+        </section>
+
+        <section id="recipesView" class="view" aria-label="Recettes">
+          <div id="recipeList" class="metro-grid" aria-live="polite"></div>
+        </section>
+
+        <section id="infosView" class="view" aria-label="Infos">
+          <div id="infoList" class="info-list" aria-live="polite"></div>
+        </section>
+      </div>
     </main>
 
     <nav class="bottom-nav" aria-label="Navigation principale">
-      <button class="nav-item active" data-view-target="restaurantsView" aria-current="page">
-        <span class="nav-label">Restaurants</span>
-      </button>
-      <button class="nav-item" data-view-target="recipesView">
-        <span class="nav-label">Recettes</span>
-      </button>
+      <div class="bottom-nav-track">
+        <button class="nav-item active" data-view-target="restaurantsView" aria-current="page">
+          <span class="nav-label">Restaurants</span>
+        </button>
+        <button class="nav-item" data-view-target="recipesView">
+          <span class="nav-label">Recettes</span>
+        </button>
+        <button class="nav-item" data-view-target="infosView">
+          <span class="nav-label">Infos</span>
+        </button>
+      </div>
     </nav>
   </div>
 
