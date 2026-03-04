@@ -11,6 +11,12 @@ const infoList = document.getElementById('infoList');
 const geotag = document.querySelector('.location-wrap');
 const menuBtn = document.querySelector('.menu-btn');
 const optionsMenu = document.getElementById('optionsMenu');
+const tileOverlay = document.getElementById('tileOverlay');
+const tileExpander = document.getElementById('tileExpander');
+const tileCloseBtn = document.getElementById('tileCloseBtn');
+
+let activeTileElement = null;
+let isTileAnimating = false;
 
 const restaurants = [
   { name: 'Rocket Smash House', meta: 'Kirchberg', size: 'tile-2x2' },
@@ -140,6 +146,7 @@ function renderRestaurantTiles(items, target) {
       <p class="tile-kicker">${item.meta}</p>
       <p class="tile-title">${item.name}</p>
     `;
+    tile.addEventListener('click', () => openTileExpander(tile));
     target.appendChild(tile);
   });
 }
@@ -154,6 +161,7 @@ function renderRecipeTiles(items, target) {
       <p class="tile-kicker">${item.meta}</p>
       <p class="tile-title">${item.name}</p>
     `;
+    tile.addEventListener('click', () => openTileExpander(tile));
     target.appendChild(tile);
   });
 }
@@ -199,6 +207,104 @@ function openOptionsMenu() {
   document.body.classList.add('menu-open');
 }
 
+function setExpanderFrame(rect) {
+  if (!tileExpander) {
+    return;
+  }
+
+  tileExpander.style.top = `${rect.top}px`;
+  tileExpander.style.left = `${rect.left}px`;
+  tileExpander.style.width = `${rect.width}px`;
+  tileExpander.style.height = `${rect.height}px`;
+}
+
+function waitForTileAnimationEnd(callback) {
+  if (!tileExpander) {
+    callback();
+    return;
+  }
+
+  let done = false;
+  const finalize = () => {
+    if (done) {
+      return;
+    }
+    done = true;
+    tileExpander.removeEventListener('transitionend', onEnd);
+    callback();
+  };
+
+  const onEnd = (event) => {
+    if (event.target !== tileExpander || event.propertyName !== 'height') {
+      return;
+    }
+    finalize();
+  };
+
+  tileExpander.addEventListener('transitionend', onEnd);
+  window.setTimeout(finalize, 420);
+}
+
+function openTileExpander(tileElement) {
+  if (!tileElement || !tileOverlay || !tileExpander || isTileAnimating || document.body.classList.contains('menu-open')) {
+    return;
+  }
+
+  isTileAnimating = true;
+  activeTileElement = tileElement;
+
+  const fromRect = tileElement.getBoundingClientRect();
+  const inset = 12;
+  const toRect = {
+    top: inset,
+    left: inset,
+    width: Math.max(0, window.innerWidth - inset * 2),
+    height: Math.max(0, window.innerHeight - inset * 2)
+  };
+
+  tileExpander.className = `${tileElement.className} tile-expander`;
+  tileExpander.innerHTML = tileElement.innerHTML;
+  tileExpander.style.transition = 'none';
+  setExpanderFrame(fromRect);
+  tileExpander.getBoundingClientRect();
+  tileExpander.style.transition = '';
+
+  tileOverlay.classList.add('open');
+  tileOverlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('tile-open');
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      tileOverlay.classList.add('expanded');
+      setExpanderFrame(toRect);
+      waitForTileAnimationEnd(() => {
+        isTileAnimating = false;
+      });
+    });
+  });
+}
+
+function closeTileExpander() {
+  if (!activeTileElement || !tileOverlay || !tileExpander || isTileAnimating) {
+    return;
+  }
+
+  isTileAnimating = true;
+
+  const toRect = activeTileElement.getBoundingClientRect();
+  tileOverlay.classList.remove('expanded');
+  setExpanderFrame(toRect);
+
+  waitForTileAnimationEnd(() => {
+    tileOverlay.classList.remove('open');
+    tileOverlay.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('tile-open');
+    tileExpander.innerHTML = '';
+    activeTileElement = null;
+    isTileAnimating = false;
+  });
+}
+
 function closeOptionsMenu() {
   if (!optionsMenu || !menuBtn) {
     return;
@@ -228,7 +334,24 @@ if (optionsMenu) {
   });
 }
 
+if (tileCloseBtn) {
+  tileCloseBtn.addEventListener('click', closeTileExpander);
+}
+
+if (tileOverlay) {
+  tileOverlay.addEventListener('click', (event) => {
+    if (event.target === tileOverlay) {
+      closeTileExpander();
+    }
+  });
+}
+
 document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && document.body.classList.contains('tile-open')) {
+    closeTileExpander();
+    return;
+  }
+
   if (event.key === 'Escape' && optionsMenu?.classList.contains('open')) {
     closeOptionsMenu();
   }
