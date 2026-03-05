@@ -1,3 +1,13 @@
+@import './styles/Geotag.css';
+@import './styles/BurgerIcon.css';
+@import './styles/TileCollection.css';
+@import './styles/TileItem.css';
+@import './styles/InfoArticlesCollection.css';
+@import './styles/InfoArticleItem.css';
+@import './styles/TileExpander.css';
+@import './styles/BottomTabs.css';
+@import './styles/OptionsMenu.css';
+
 :root {
   --accent: #00a4ef;
   --tile-ink: #ffffff;
@@ -46,13 +56,3 @@ body {
   padding-bottom: 8px;
   overflow: hidden;
 }
-
-@import './styles/Geotag.css';
-@import './styles/BurgerIcon.css';
-@import './styles/TileCollection.css';
-@import './styles/TileItem.css';
-@import './styles/InfoArticlesCollection.css';
-@import './styles/InfoArticleItem.css';
-@import './styles/TileExpander.css';
-@import './styles/BottomTabs.css';
-@import './styles/OptionsMenu.css';
