@@ -56,3 +56,13 @@ body {
   padding-bottom: 8px;
   overflow: hidden;
 }
+
+button,
+[role="button"],
+.tile,
+.nav-item,
+.menu-btn,
+.tile-close-btn,
+.option-row {
+  -webkit-tap-highlight-color: transparent;
+}
