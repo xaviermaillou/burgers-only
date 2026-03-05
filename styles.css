@@ -14,7 +14,6 @@
   --tile-ink: #ffffff;
   --tile-ink-muted: rgba(255, 255, 255, 0.86);
   --gap: 18px;
-  --cols: 2;
   --header-top: calc(env(safe-area-inset-top, 0px) + 18px);
 }
 

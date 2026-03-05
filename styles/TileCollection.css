@@ -1,3 +1,7 @@
+:root {
+  --cols: 2;
+}
+
 .metro-grid {
   width: 100%;
   display: grid;
