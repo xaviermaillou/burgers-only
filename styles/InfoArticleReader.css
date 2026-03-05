@@ -1,0 +1,62 @@
+body.info-open {
+  overflow: hidden;
+}
+
+.info-reader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  background: #ffffff;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 220ms ease, visibility 220ms ease;
+  padding: calc(env(safe-area-inset-top, 0px) + 60px) 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+}
+
+.info-reader-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.info-reader-panel {
+  height: 100%;
+  overflow: auto;
+}
+
+.info-reader-close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: 18px;
+  border: 0;
+  background: transparent;
+  color: #111111;
+  font-size: 2.6rem;
+  line-height: 1;
+  font-weight: 300;
+  padding: 0;
+}
+
+.info-reader-title {
+  margin: 0 0 14px;
+  font-size: 2.1rem;
+  line-height: 0.95;
+  font-weight: 600;
+}
+
+.info-reader-body {
+  display: grid;
+  gap: 14px;
+}
+
+.info-reader-body p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  color: #222222;
+}
+
+.info-article {
+  cursor: pointer;
+}

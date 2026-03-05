@@ -21,12 +21,28 @@
     </button>
 
     <aside id="optionsMenu" class="options-menu" aria-hidden="true">
-      <div class="options-panel">        <form class="options-form">
-          <label class="option-row"><input type="checkbox" name="burger_option" value="sans-gluten" />Sans gluten</label>
-          <label class="option-row"><input type="checkbox" name="burger_option" value="sans-lactose" />Sans lactose</label>
-          <label class="option-row"><input type="checkbox" name="burger_option" value="halal" />Halal</label>
-          <label class="option-row"><input type="checkbox" name="burger_option" value="kasher" />Kasher</label>
-          <label class="option-row"><input type="checkbox" name="burger_option" value="vegan" />Vegan</label>
+      <div class="options-panel">
+        <form class="options-form">
+          <section class="option-group" aria-label="Restrictions alimentaires">
+            <h3 class="option-group-title">Restrictions alimentaires</h3>
+            <label class="option-row"><input type="checkbox" name="burger_option" value="sans-gluten" />Sans gluten</label>
+            <label class="option-row"><input type="checkbox" name="burger_option" value="sans-lactose" />Sans lactose</label>
+          </section>
+
+          <section class="option-group" aria-label="Religions">
+            <h3 class="option-group-title">Religions</h3>
+            <label class="option-row"><input type="checkbox" name="burger_option" value="halal" />Halal</label>
+            <label class="option-row"><input type="checkbox" name="burger_option" value="kasher" />Kasher</label>
+          </section>
+
+          <section class="option-group" aria-label="Sanitaire">
+            <h3 class="option-group-title">Sanitaire</h3>
+            <label class="option-row"><input type="checkbox" name="burger_option" value="sans-glyphosate" />Sans glyphosate</label>
+            <label class="option-row"><input type="checkbox" name="burger_option" value="boeuf-sans-hormones" />Boeuf sans hormones</label>
+            <label class="option-row"><input type="checkbox" name="burger_option" value="boeuf-local" />Boeuf local</label>
+            <label class="option-row"><input type="checkbox" name="burger_option" value="sans-antibiotiques" />Sans antibiotiques</label>
+            <label class="option-row"><input type="checkbox" name="burger_option" value="elevage-plein-air" />Elevage plein air</label>
+          </section>
         </form>
       </div>
     </aside>
@@ -34,6 +50,14 @@
     <aside id="tileOverlay" class="tile-overlay" aria-hidden="true">
       <article id="tileExpander" class="tile tile-expander" aria-live="polite"></article>
       <button id="tileCloseBtn" class="tile-close-btn" aria-label="Fermer l'article">×</button>
+    </aside>
+
+    <aside id="infoReaderOverlay" class="info-reader-overlay" aria-hidden="true">
+      <button id="infoReaderClose" class="info-reader-close" aria-label="Fermer l'article info">×</button>
+      <article class="info-reader-panel" aria-live="polite">
+        <h2 id="infoReaderTitle" class="info-reader-title"></h2>
+        <div id="infoReaderBody" class="info-reader-body"></div>
+      </article>
     </aside>
 
     <main class="views-viewport">
