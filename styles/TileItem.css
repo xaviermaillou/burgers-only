@@ -1,0 +1,59 @@
+.tile {
+  border: 4px solid #111111;
+  background: #ffffff;
+  color: #111111;
+  box-shadow: 6px 6px 0 0 #111111;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  position: relative;
+  z-index: 20;
+}
+
+.tile-1x1 {
+  grid-column: span 1;
+  aspect-ratio: 1 / 1;
+}
+
+.tile-2x1 {
+  grid-column: span 2;
+  height: calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols));
+}
+
+.tile-2x2 {
+  grid-column: span 2;
+  aspect-ratio: 1 / 1;
+}
+
+.tile-kicker {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #333333;
+}
+
+.tile-title {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+  line-height: 0.92;
+  font-weight: 600;
+}
+
+.restaurant-tile .tile-kicker {
+  letter-spacing: 0.08em;
+}
+
+.recipe-tile .tile-kicker {
+  letter-spacing: 0.04em;
+}
+
+.restaurant-tile {
+  box-shadow: 6px 6px 0 0 #f28c1b;
+}
+
+.recipe-tile {
+  box-shadow: 6px 6px 0 0 #f05aa6;
+}

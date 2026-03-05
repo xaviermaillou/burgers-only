@@ -1,0 +1,51 @@
+.topbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 0;
+  position: fixed;
+  top: var(--header-top);
+  left: 20px;
+  right: 20px;
+  z-index: 40;
+  background: transparent;
+  padding: 0;
+  border-bottom: 0;
+}
+
+.location-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+  transition: opacity 260ms ease;
+}
+
+body.geotag-hidden .location-wrap {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.location-text {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.05;
+  font-weight: 400;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+  color: #111111;
+  transform: translateY(3px);
+}
+
+.pin-icon {
+  width: 21px;
+  height: 21px;
+  border: 3px solid #111111;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: inline-block;
+}

@@ -1,0 +1,5 @@
+.info-list {
+  display: grid;
+  gap: 18px;
+  padding: 4px 0 10px;
+}

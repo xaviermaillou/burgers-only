@@ -1,0 +1,59 @@
+.menu-btn {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  width: 40px;
+  height: 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  position: fixed;
+  top: var(--header-top);
+  right: 20px;
+  z-index: 120;
+  transition: opacity 180ms ease;
+}
+
+.menu-line {
+  width: 26px;
+  background: #111111;
+  display: block;
+  transition: transform 240ms ease, opacity 180ms ease, width 240ms ease, border-radius 240ms ease;
+  transform-origin: center;
+}
+
+.menu-btn .menu-line:nth-child(1) {
+  height: 7px;
+  border-radius: 50% 50% 1px 1px;
+}
+
+.menu-btn .menu-line:nth-child(2) {
+  width: 26px;
+  height: 5px;
+  border-radius: 3px;
+}
+
+.menu-btn .menu-line:nth-child(3) {
+  height: 6px;
+  border-radius: 1px 1px 50% 50%;
+}
+
+.menu-btn[aria-expanded="true"] .menu-line:nth-child(1) {
+  height: 4px;
+  transform: translateY(9px) rotate(45deg);
+  border-radius: 999px;
+}
+
+.menu-btn[aria-expanded="true"] .menu-line:nth-child(2) {
+  opacity: 0;
+  width: 14px;
+}
+
+.menu-btn[aria-expanded="true"] .menu-line:nth-child(3) {
+  height: 4px;
+  transform: translateY(-9px) rotate(-45deg);
+  border-radius: 999px;
+}
