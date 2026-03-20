@@ -195,6 +195,7 @@ renderInfoArticlesCollection({
   target: infoList,
   onArticleOpen: (item) => infoReader.open(item)
 });
+geotag.locate();
 loadRestaurants();
 loadRecipes();
 geotag.update();

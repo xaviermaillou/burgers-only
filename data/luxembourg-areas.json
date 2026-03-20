@@ -1,0 +1,134 @@
+[
+  {
+    "name": "Kirchberg",
+    "city": "Luxembourg",
+    "minLat": 49.6205,
+    "maxLat": 49.6405,
+    "minLon": 6.145,
+    "maxLon": 6.175
+  },
+  {
+    "name": "Limpertsberg",
+    "city": "Luxembourg",
+    "minLat": 49.618,
+    "maxLat": 49.632,
+    "minLon": 6.11,
+    "maxLon": 6.135
+  },
+  {
+    "name": "Ville Haute",
+    "city": "Luxembourg",
+    "minLat": 49.607,
+    "maxLat": 49.6155,
+    "minLon": 6.122,
+    "maxLon": 6.137
+  },
+  {
+    "name": "Belair",
+    "city": "Luxembourg",
+    "minLat": 49.603,
+    "maxLat": 49.615,
+    "minLon": 6.095,
+    "maxLon": 6.118
+  },
+  {
+    "name": "Gare",
+    "city": "Luxembourg",
+    "minLat": 49.596,
+    "maxLat": 49.6075,
+    "minLon": 6.125,
+    "maxLon": 6.145
+  },
+  {
+    "name": "Bonnevoie",
+    "city": "Luxembourg",
+    "minLat": 49.588,
+    "maxLat": 49.602,
+    "minLon": 6.13,
+    "maxLon": 6.155
+  },
+  {
+    "name": "Clervaux",
+    "minLat": 49.95,
+    "maxLat": 50.18,
+    "minLon": 5.73,
+    "maxLon": 6.15
+  },
+  {
+    "name": "Wiltz",
+    "minLat": 49.86,
+    "maxLat": 49.98,
+    "minLon": 5.75,
+    "maxLon": 6.06
+  },
+  {
+    "name": "Vianden",
+    "minLat": 49.88,
+    "maxLat": 50.05,
+    "minLon": 6.15,
+    "maxLon": 6.31
+  },
+  {
+    "name": "Diekirch",
+    "minLat": 49.80,
+    "maxLat": 49.92,
+    "minLon": 6.02,
+    "maxLon": 6.27
+  },
+  {
+    "name": "Echternach",
+    "minLat": 49.74,
+    "maxLat": 49.88,
+    "minLon": 6.17,
+    "maxLon": 6.53
+  },
+  {
+    "name": "Redange",
+    "minLat": 49.72,
+    "maxLat": 49.88,
+    "minLon": 5.73,
+    "maxLon": 5.98
+  },
+  {
+    "name": "Mersch",
+    "minLat": 49.68,
+    "maxLat": 49.82,
+    "minLon": 5.97,
+    "maxLon": 6.16
+  },
+  {
+    "name": "Grevenmacher",
+    "minLat": 49.62,
+    "maxLat": 49.78,
+    "minLon": 6.14,
+    "maxLon": 6.48
+  },
+  {
+    "name": "Capellen",
+    "minLat": 49.58,
+    "maxLat": 49.75,
+    "minLon": 5.73,
+    "maxLon": 5.97
+  },
+  {
+    "name": "Luxembourg",
+    "minLat": 49.55,
+    "maxLat": 49.70,
+    "minLon": 5.97,
+    "maxLon": 6.20
+  },
+  {
+    "name": "Esch-sur-Alzette",
+    "minLat": 49.45,
+    "maxLat": 49.62,
+    "minLon": 5.83,
+    "maxLon": 6.12
+  },
+  {
+    "name": "Remich",
+    "minLat": 49.50,
+    "maxLat": 49.66,
+    "minLon": 6.12,
+    "maxLon": 6.42
+  }
+]
