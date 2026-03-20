@@ -12,6 +12,15 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12 })
   let activeTileElement = null;
   let isAnimating = false;
 
+  const readExpandedList = (tileElement) => {
+    try {
+      const parsed = JSON.parse(tileElement.dataset.expandedList || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
   const setFrame = (rect) => {
     expander.style.top = `${rect.top}px`;
     expander.style.left = `${rect.left}px`;
@@ -61,7 +70,47 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12 })
     };
 
     expander.className = `${tileElement.className} tile-expander`;
-    expander.innerHTML = tileElement.innerHTML;
+    const titleText = tileElement.querySelector('.tile-title')?.textContent || '';
+    const expandedList = readExpandedList(tileElement);
+    const content = document.createElement('div');
+    content.className = 'tile-expander-content';
+
+    const top = document.createElement('div');
+    top.className = 'tile-expander-top';
+
+    const bottom = document.createElement('div');
+    bottom.className = 'tile-expander-bottom';
+
+    if (tileElement.dataset.expandedBody) {
+      const body = document.createElement('p');
+      body.className = 'tile-expanded-body';
+      body.textContent = tileElement.dataset.expandedBody;
+      top.appendChild(body);
+    }
+
+    if (expandedList.length) {
+      const list = document.createElement('ul');
+      list.className = 'tile-expanded-list';
+
+      expandedList.forEach((item) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = item;
+        list.appendChild(listItem);
+      });
+
+      top.appendChild(list);
+    }
+
+    if (titleText) {
+      const title = document.createElement('p');
+      title.className = 'tile-title';
+      title.textContent = titleText;
+      bottom.appendChild(title);
+    }
+
+    content.appendChild(top);
+    content.appendChild(bottom);
+    expander.replaceChildren(content);
     expander.style.transition = 'none';
     setFrame(fromRect);
     expander.getBoundingClientRect();
@@ -90,10 +139,12 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12 })
     isAnimating = true;
     const toRect = activeTileElement.getBoundingClientRect();
 
+    expander.classList.add('is-collapsing');
     overlay.classList.remove('expanded');
     setFrame(toRect);
 
     waitAnimationEnd(() => {
+      expander.classList.remove('is-collapsing');
       overlay.classList.remove('open');
       overlay.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('tile-open');

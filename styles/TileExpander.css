@@ -48,6 +48,33 @@ body.tile-open .menu-btn {
   box-shadow: 0 0 0 0 transparent;
 }
 
+.tile-expander-content {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tile-expander-top {
+  display: grid;
+  align-content: start;
+  transition: opacity 120ms ease;
+}
+
+.tile-expander-bottom {
+  display: grid;
+  align-content: end;
+}
+
+.tile-expander.is-collapsing .tile-expander-top {
+  opacity: 0;
+}
+
+.tile-expander .tile-title {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .tile-close-btn {
   position: fixed;
   top: calc(env(safe-area-inset-top, 0px) + 18px);

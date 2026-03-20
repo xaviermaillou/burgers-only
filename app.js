@@ -6,6 +6,8 @@ import { initOptionsMenu } from './components/OptionsMenu.js';
 import { initBottomTabs } from './components/BottomTabs.js';
 import { initTileExpander } from './components/TileExpander.js';
 import { initInfoArticleReader } from './components/InfoArticleReader.js';
+import { fetchRestaurants } from './services/restaurants.js';
+import { fetchRecipes } from './services/recipes.js';
 
 const views = [...document.querySelectorAll('.view')];
 const navItems = [...document.querySelectorAll('.nav-item')];
@@ -29,26 +31,6 @@ const infoReaderOverlay = document.getElementById('infoReaderOverlay');
 const infoReaderClose = document.getElementById('infoReaderClose');
 const infoReaderTitle = document.getElementById('infoReaderTitle');
 const infoReaderBody = document.getElementById('infoReaderBody');
-
-const restaurants = [
-  { name: 'Rocket Smash House', meta: 'Kirchberg', size: 'tile-2x2' },
-  { name: 'Pink Buns Club', meta: 'Lux-Centre', size: 'tile-2x1' },
-  { name: 'Mint Patty Lab', meta: 'Belair', size: 'tile-1x1' },
-  { name: 'Blue Char Burger', meta: 'Gare', size: 'tile-1x1' },
-  { name: 'Old Town Burgers', meta: 'Ville Haute', size: 'tile-2x1' },
-  { name: 'Flame District', meta: 'Cloche d Or', size: 'tile-1x1' },
-  { name: 'Grand Bun Corner', meta: 'Limpertsberg', size: 'tile-1x1' }
-];
-
-const recipes = [
-  { name: 'Smash Burger Classique', meta: '20 min', size: 'tile-2x1' },
-  { name: 'Burger Bacon BBQ', meta: '30 min', size: 'tile-1x1' },
-  { name: 'Burger Veggie Halloumi', meta: '25 min', size: 'tile-1x1' },
-  { name: 'Burger Poulet Croustillant', meta: '35 min', size: 'tile-2x2' },
-  { name: 'Burger Bleu Noix', meta: '28 min', size: 'tile-1x1' },
-  { name: 'Burger Fish and Dill', meta: '25 min', size: 'tile-1x1' },
-  { name: 'Burger Oignons Crispy', meta: '22 min', size: 'tile-2x1' }
-];
 
 const infos = [
   {
@@ -144,25 +126,77 @@ function switchView(viewId) {
   window.scrollTo(0, 0);
 }
 
-renderTileCollection({
-  items: restaurants,
-  target: restaurantList,
-  variant: 'restaurant',
-  onTileOpen: (tileElement) => tileExpander.open(tileElement)
-});
+function mapTileSizeToClass(size) {
+  if (size === 'l') {
+    return 'tile-2x2';
+  }
 
-renderTileCollection({
-  items: recipes,
-  target: recipeList,
-  variant: 'recipe',
-  onTileOpen: (tileElement) => tileExpander.open(tileElement)
-});
+  if (size === 'm') {
+    return 'tile-2x1';
+  }
+
+  return 'tile-1x1';
+}
+
+function renderRestaurants(restaurants) {
+  const restaurantTiles = restaurants.map((restaurant) => ({
+    name: restaurant.name,
+    meta: restaurant.area,
+    size: mapTileSizeToClass(restaurant.size)
+  }));
+
+  renderTileCollection({
+    items: restaurantTiles,
+    target: restaurantList,
+    variant: 'restaurant',
+    onTileOpen: (tileElement) => tileExpander.open(tileElement)
+  });
+}
+
+async function loadRestaurants() {
+  try {
+    const restaurants = await fetchRestaurants();
+    renderRestaurants(restaurants);
+  } catch (error) {
+    console.error('Failed to load restaurants from Firestore.', error);
+    renderRestaurants([]);
+  }
+}
+
+function renderRecipes(recipes) {
+  const recipeTiles = recipes.map((recipe) => ({
+    name: recipe.name,
+    meta: '',
+    size: mapTileSizeToClass(recipe.size),
+    expandedBody: recipe.overview,
+    expandedList: recipe.ingredients.map((ingredient) => ingredient.name).filter(Boolean)
+  }));
+
+  renderTileCollection({
+    items: recipeTiles,
+    target: recipeList,
+    variant: 'recipe',
+    onTileOpen: (tileElement) => tileExpander.open(tileElement)
+  });
+}
+
+async function loadRecipes() {
+  try {
+    const recipes = await fetchRecipes();
+    renderRecipes(recipes);
+  } catch (error) {
+    console.error('Failed to load recipes from Firestore.', error);
+    renderRecipes([]);
+  }
+}
 
 renderInfoArticlesCollection({
   items: infos,
   target: infoList,
   onArticleOpen: (item) => infoReader.open(item)
 });
+loadRestaurants();
+loadRecipes();
 geotag.update();
 switchView('restaurantsView');
 

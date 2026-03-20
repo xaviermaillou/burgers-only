@@ -42,6 +42,26 @@
   font-weight: 600;
 }
 
+.tile-expanded-body {
+  margin: 14px 0 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #2f2f2f;
+}
+
+.tile-expanded-list {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: #2f2f2f;
+}
+
+.tile-expanded-list li {
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
 .restaurant-tile .tile-kicker {
   letter-spacing: 0.08em;
 }
