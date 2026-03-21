@@ -28,6 +28,8 @@ body.menu-open .topbar {
 }
 
 .options-panel {
+  --options-content-size: 1.15rem;
+  --options-content-line-height: 1.35;
   border: 0;
   background: #ffffff;
   min-height: 100%;
@@ -47,6 +49,56 @@ body.menu-open .topbar {
   display: grid;
   gap: 16px;
   margin-top: 8px;
+}
+
+.account-panel {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 22px;
+}
+
+.account-copy {
+  margin: 0;
+  font-size: var(--options-content-size);
+  line-height: var(--options-content-line-height);
+  font-weight: 400;
+  color: #444444;
+}
+
+.account-actions {
+  display: inline-grid;
+  gap: 16px;
+  justify-content: start;
+}
+
+.account-btn {
+  border: 3px solid #111111;
+  background: #ffffff;
+  color: #111111;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--options-content-size);
+  line-height: var(--options-content-line-height);
+  font-weight: 400;
+  text-align: left;
+  width: 100%;
+}
+
+.account-provider-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.account-provider-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .options-title {
@@ -84,7 +136,8 @@ body.menu-open .topbar {
   gap: 12px;
   border: 0;
   padding: 12px 0;
-  font-size: 1.15rem;
+  font-size: var(--options-content-size);
+  line-height: var(--options-content-line-height);
   font-weight: 400;
 }
 
