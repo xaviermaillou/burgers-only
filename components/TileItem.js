@@ -12,7 +12,7 @@ export function createTileItem(item, variant, onOpen) {
   tile.dataset.expandedList = JSON.stringify(item.expandedList || []);
 
   if (typeof onOpen === 'function') {
-    tile.addEventListener('click', () => onOpen(tile));
+    tile.addEventListener('click', () => onOpen(tile, item));
   }
 
   return tile;

@@ -1,4 +1,4 @@
-export function initOptionsMenu({ menuElement, burgerIcon }) {
+export function initOptionsMenu({ menuElement, burgerIcon, onOpen }) {
   if (!menuElement || !burgerIcon) {
     return {
       open: () => {},
@@ -17,6 +17,10 @@ export function initOptionsMenu({ menuElement, burgerIcon }) {
     menuElement.setAttribute('aria-hidden', 'false');
     burgerIcon.setExpanded(true);
     document.body.classList.add('menu-open');
+
+    if (typeof onOpen === 'function') {
+      onOpen();
+    }
   };
 
   const close = () => {

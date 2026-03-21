@@ -32,6 +32,14 @@ const infoReaderClose = document.getElementById('infoReaderClose');
 const infoReaderTitle = document.getElementById('infoReaderTitle');
 const infoReaderBody = document.getElementById('infoReaderBody');
 
+function pushDataLayerEvent(eventName, payload = {}) {
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: eventName,
+    ...payload
+  });
+}
+
 const infos = [
   {
     title: 'Comment choisir un bun',
@@ -73,7 +81,15 @@ const infos = [
 
 const geotag = initGeotag({ element: geotagElement, threshold: 28 });
 const burgerIcon = initBurgerIcon(menuButton);
-const optionsMenu = initOptionsMenu({ menuElement: optionsMenuElement, burgerIcon });
+const optionsMenu = initOptionsMenu({
+  menuElement: optionsMenuElement,
+  burgerIcon,
+  onOpen: () => {
+    pushDataLayerEvent('open_menu', {
+      menu_name: 'options'
+    });
+  }
+});
 const tileExpander = initTileExpander({
   overlay: tileOverlay,
   expander: tileExpanderElement,
@@ -91,7 +107,19 @@ const bottomTabs = initBottomTabs({
   bottomNav,
   bottomNavTrack,
   items: navItems,
-  onSelect: (viewId) => switchView(viewId)
+  onSelect: (viewId) => {
+    const activeView = document.querySelector('.view.active');
+    if (activeView?.id === viewId) {
+      return;
+    }
+
+    const tabLabel = navItems.find((item) => item.dataset.viewTarget === viewId)?.textContent?.trim() || viewId;
+    pushDataLayerEvent('navigate_tab', {
+      tab_id: viewId,
+      tab_label: tabLabel
+    });
+    switchView(viewId);
+  }
 });
 
 function updateViewportHeight(activeView) {
@@ -149,7 +177,13 @@ function renderRestaurants(restaurants) {
     items: restaurantTiles,
     target: restaurantList,
     variant: 'restaurant',
-    onTileOpen: (tileElement) => tileExpander.open(tileElement)
+    onTileOpen: (tileElement, item) => {
+      pushDataLayerEvent('view_item', {
+        item_name: item.name,
+        item_category: 'restaurant'
+      });
+      tileExpander.open(tileElement);
+    }
   });
 }
 
@@ -176,7 +210,13 @@ function renderRecipes(recipes) {
     items: recipeTiles,
     target: recipeList,
     variant: 'recipe',
-    onTileOpen: (tileElement) => tileExpander.open(tileElement)
+    onTileOpen: (tileElement, item) => {
+      pushDataLayerEvent('view_item', {
+        item_name: item.name,
+        item_category: 'recipe'
+      });
+      tileExpander.open(tileElement);
+    }
   });
 }
 
