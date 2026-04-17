@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1000">
+  <rect width="2000" height="1000" fill="black" fill-opacity="0"/>
+  <path d="M120 150 C650 80, 1260 150, 1880 300 C1380 430, 810 470, 210 580 C710 720, 1280 760, 1860 880" fill="none" stroke="white" stroke-width="275" stroke-linecap="round" stroke-linejoin="round" transform="rotate(4 1000 500)"/>
+</svg>

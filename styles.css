@@ -10,6 +10,7 @@
 @import './styles/OptionsMenu.css';
 
 :root {
+  color-scheme: light;
   --accent: #00a4ef;
   --tile-ink: #ffffff;
   --tile-ink-muted: rgba(255, 255, 255, 0.86);
@@ -75,4 +76,145 @@ button,
 .tile-close-btn,
 .option-row {
   -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --accent: #2ea8ff;
+    --tile-ink: #f4f7fb;
+    --tile-ink-muted: rgba(244, 247, 251, 0.85);
+  }
+
+  body {
+    background: #0b0d12;
+    color: #f4f7fb;
+  }
+
+  .app-shell {
+    background: #0b0d12;
+  }
+
+  .location-text {
+    color: #f4f7fb;
+  }
+
+  .pin-icon {
+    border-color: #f4f7fb;
+  }
+
+  .menu-line {
+    background: #f4f7fb;
+  }
+
+  .bottom-nav {
+    background: #0b0d12;
+  }
+
+  .bottom-nav::before {
+    background: linear-gradient(to bottom, rgba(11, 13, 18, 0) 0%, #0b0d12 88%);
+  }
+
+  .nav-label {
+    color: #8f98a3;
+  }
+
+  .nav-item.active .nav-label {
+    color: #f4f7fb;
+  }
+
+  .tile {
+    border-color: #d9e1eb;
+    background: #141922;
+    color: #f4f7fb;
+    box-shadow: 6px 6px 0 0 #3d4552;
+  }
+
+  .restaurant-tile {
+    box-shadow: 6px 6px 0 0 #b86e22;
+  }
+
+  .recipe-tile {
+    box-shadow: 6px 6px 0 0 #aa4f7f;
+  }
+
+  .tile-kicker {
+    color: #c6ced9;
+  }
+
+  .tile-expanded-body,
+  .tile-expanded-list,
+  .info-article p {
+    color: #d6dde7;
+  }
+
+  .tile:not(.tile-expander).has-image::before {
+    background: rgba(8, 11, 15, 0.42);
+  }
+
+  .tile-expander {
+    background: #141922;
+    color: #f4f7fb;
+  }
+
+  .tile-expander-veil {
+    background-color: rgba(8, 11, 15, 0.42);
+  }
+
+  .tile-overlay.expanded .tile-expander-veil {
+    background-color: rgba(8, 11, 15, 0.58);
+  }
+
+  .tile-close-btn {
+    color: #f4f7fb;
+  }
+
+  .info-reader-overlay {
+    background: #0b0d12;
+  }
+
+  .info-reader-close {
+    color: #f4f7fb;
+  }
+
+  .info-reader-body p {
+    color: #d6dde7;
+  }
+
+  .options-menu,
+  .options-panel {
+    background: #0b0d12;
+  }
+
+  .options-title,
+  .option-group-title {
+    color: #96a0ad;
+  }
+
+  .account-copy {
+    color: #bdc7d4;
+  }
+
+  .account-copy.error {
+    color: #ff7f79;
+  }
+
+  .account-btn {
+    border-color: #d9e1eb;
+    background: #151b25;
+    color: #f4f7fb;
+  }
+
+  .option-row input {
+    border-color: #d9e1eb;
+    background: #0b0d12;
+  }
+
+  .option-row input:checked {
+    background: #d9e1eb;
+  }
+
+  .option-row input:focus-visible {
+    outline-color: #d9e1eb;
+  }
 }

@@ -69,8 +69,12 @@ body.tile-open .menu-btn {
   pointer-events: none;
   z-index: 0;
   opacity: 0;
-  will-change: opacity;
-  transition: opacity 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  filter: blur(0);
+  will-change: opacity, filter;
+  transition:
+    opacity 320ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    filter 160ms ease-out;
+  transition-delay: 0ms, 0ms;
 }
 
 .tile-expander-image-mask {
@@ -83,7 +87,7 @@ body.tile-open .menu-btn {
   z-index: 1;
   opacity: 1;
   will-change: opacity;
-  transition: opacity 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: opacity 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
   -webkit-mask-image: var(--tile-mask-url);
   mask-image: var(--tile-mask-url);
   -webkit-mask-mode: alpha;
@@ -101,7 +105,10 @@ body.tile-open .menu-btn {
   inset: 0;
   pointer-events: none;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.58);
+  background-color: rgba(255, 255, 255, 0.58);
+  will-change: background-color;
+  transition: background-color 160ms ease-out;
+  transition-delay: 0ms;
 }
 
 .tile-overlay.expanded .tile-expander-image-mask {
@@ -110,6 +117,13 @@ body.tile-open .menu-btn {
 
 .tile-overlay.expanded .tile-expander-image-base {
   opacity: 1;
+  filter: blur(8px);
+  transition-delay: 0ms, 360ms;
+}
+
+.tile-overlay.expanded .tile-expander-veil {
+  background-color: rgba(255, 255, 255, 0.72);
+  transition-delay: 360ms;
 }
 
 .tile-expander-top {

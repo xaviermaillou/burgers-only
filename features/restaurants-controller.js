@@ -13,6 +13,9 @@ const RESTAURANT_SIZE_BY_DISPLAY_INDEX = {
   8: 'm',
   9: 's'
 };
+const WIDE_MASK_TILE_INDEXES = new Set([3, 4, 6, 8]);
+const SQUARE_MASK_COUNT = 20;
+const WIDE_MASK_COUNT = 10;
 
 function toFiniteNumber(value) {
   const parsed = Number(value);
@@ -156,14 +159,21 @@ export function initRestaurantsController({
   };
 
   const renderRestaurants = (restaurants) => {
-    const restaurantTiles = restaurants.map((restaurant, index) => ({
-      routeId: toRouteId(restaurant.id, `restaurant-${index}`),
-      name: restaurant.name,
-      meta: restaurant.area,
-      image: restaurant.image || '',
-      maskIndex: (index % 20) + 1,
-      size: mapTileSizeToClass(getRestaurantSizeByDisplayIndex(index))
-    }));
+    const restaurantTiles = restaurants.map((restaurant, index) => {
+      const useWideMask = WIDE_MASK_TILE_INDEXES.has(index);
+
+      return {
+        maskKind: useWideMask ? 'wide' : 'square',
+        routeId: toRouteId(restaurant.id, `restaurant-${index}`),
+        name: restaurant.name,
+        meta: restaurant.area,
+        image: restaurant.image || '',
+        maskIndex: useWideMask
+          ? (index % WIDE_MASK_COUNT) + 1
+          : (index % SQUARE_MASK_COUNT) + 1,
+        size: mapTileSizeToClass(getRestaurantSizeByDisplayIndex(index))
+      };
+    });
 
     renderTileCollection({
       items: restaurantTiles,

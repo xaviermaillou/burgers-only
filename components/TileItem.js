@@ -1,14 +1,31 @@
-const MASK_COUNT = 20;
+const SQUARE_MASK_COUNT = 20;
+const WIDE_MASK_COUNT = 10;
+const MASK_KIND_SQUARE = 'square';
+const MASK_KIND_WIDE = 'wide';
+const MASK_CONFIG = {
+  [MASK_KIND_SQUARE]: {
+    count: SQUARE_MASK_COUNT,
+    prefix: 'tile-mask'
+  },
+  [MASK_KIND_WIDE]: {
+    count: WIDE_MASK_COUNT,
+    prefix: 'tile-mask-wide'
+  }
+};
 const TEST_FALLBACK_IMAGE = 'data/test-assets/mock-burger-mask-test.svg';
 let imageLoadDelayMs = 0;
 
-function normalizeMaskIndex(value) {
+function normalizeMaskKind(value) {
+  return value === MASK_KIND_WIDE ? MASK_KIND_WIDE : MASK_KIND_SQUARE;
+}
+
+function normalizeMaskIndex(value, maxCount) {
   const numeric = Number(value);
   if (!Number.isInteger(numeric)) {
     return null;
   }
 
-  if (numeric < 1 || numeric > MASK_COUNT) {
+  if (numeric < 1 || numeric > maxCount) {
     return null;
   }
 
@@ -27,14 +44,18 @@ function stableHash(value) {
   return hash >>> 0;
 }
 
-function resolveMaskIndex(item, variant) {
-  const explicitMaskIndex = normalizeMaskIndex(item.maskIndex);
-  if (explicitMaskIndex !== null) {
-    return explicitMaskIndex;
-  }
+function resolveMask(item, variant) {
+  const maskKind = normalizeMaskKind(item.maskKind);
+  const config = MASK_CONFIG[maskKind];
+  const explicitMaskIndex = normalizeMaskIndex(item.maskIndex, config.count);
+  const seed = `${maskKind}:${variant}:${item.routeId || item.id || item.name || ''}`;
+  const maskIndex = explicitMaskIndex !== null ? explicitMaskIndex : (stableHash(seed) % config.count) + 1;
 
-  const seed = `${variant}:${item.routeId || item.id || item.name || ''}`;
-  return (stableHash(seed) % MASK_COUNT) + 1;
+  return {
+    kind: maskKind,
+    index: maskIndex,
+    filename: `${config.prefix}-${String(maskIndex).padStart(2, '0')}.svg`
+  };
 }
 
 function resolveImageUrl(item) {
@@ -65,8 +86,8 @@ export function createTileItem(item, variant, onOpen) {
   const kickerMarkup = item.meta ? `<p class="tile-kicker">${item.meta}</p>` : '';
   const imageUrl = resolveImageUrl(item);
   const hasImageClass = imageUrl ? 'has-image' : '';
-  const maskIndex = imageUrl ? resolveMaskIndex(item, variant) : null;
-  const maskName = maskIndex ? `tile-mask-${String(maskIndex).padStart(2, '0')}.svg` : '';
+  const mask = imageUrl ? resolveMask(item, variant) : null;
+  const maskName = mask ? mask.filename : '';
   const imageMarkup = imageUrl
     ? `<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="${imageUrl}" alt="" class="tile-bg-image" />`
     : '';

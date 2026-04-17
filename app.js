@@ -248,7 +248,7 @@ const tileExpander = initTileExpander({
   overlay: tileOverlay,
   expander: tileExpanderElement,
   closeButton: tileCloseButton,
-  inset: 0,
+  inset: 12,
   onClose: () => {
     if (routerController) {
       routerController.handleTileClose();

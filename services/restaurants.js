@@ -6,18 +6,20 @@ import {
   query
 } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js';
 import { db } from './firebase.js';
+import { resolveItemImage } from './item-images.js';
 
 const COLLECTION_NAME = 'restaurants';
 
 async function normalizeRestaurant(doc) {
   const data = doc.data();
+  const manifestImage = await resolveItemImage(COLLECTION_NAME, doc.id);
 
   return {
     id: doc.id,
     name: data.name || '',
     area: data.area || '',
     geo: data.geo || null,
-    image: data.image || data.photo_url || ''
+    image: manifestImage || data.image || data.photo_url || ''
   };
 }
 

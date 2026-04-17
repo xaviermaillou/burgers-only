@@ -7,6 +7,7 @@ import {
   query
 } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js';
 import { db } from './firebase.js';
+import { resolveItemImage } from './item-images.js';
 
 const COLLECTION_NAME = 'recipes';
 const RECIPE_SIZE_BY_INDEX = {
@@ -41,12 +42,13 @@ async function normalizeRecipe(doc, index) {
   const data = doc.data();
   const ingredientRefs = Array.isArray(data.ingredients) ? data.ingredients : [];
   const ingredients = await Promise.all(ingredientRefs.map(resolveIngredient));
+  const manifestImage = await resolveItemImage(COLLECTION_NAME, doc.id);
 
   return {
     id: doc.id,
     name: data.name || '',
     overview: data.overview || '',
-    image: data.image || '',
+    image: manifestImage || data.image || '',
     ingredients: ingredients.filter(Boolean),
     size: getRecipeSize(index)
   };
