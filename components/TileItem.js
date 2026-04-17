@@ -10,6 +10,9 @@ export function createTileItem(item, variant, onOpen) {
   `;
   tile.dataset.expandedBody = item.expandedBody || '';
   tile.dataset.expandedList = JSON.stringify(item.expandedList || []);
+  if (item.routeId) {
+    tile.dataset.routeId = item.routeId;
+  }
 
   if (typeof onOpen === 'function') {
     tile.addEventListener('click', () => onOpen(tile, item));

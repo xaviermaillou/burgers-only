@@ -40,9 +40,9 @@
         <form class="options-form">
           <section class="account-panel" aria-label="Connexion utilisateur">
             <h2 class="options-title">Espace utilisateur</h2>
-            <p class="account-copy">Connectez-vous pour retrouver vos preferences et vos favoris.</p>
+            <p id="accountStatus" class="account-copy" role="status" aria-live="polite">Connectez-vous pour retrouver vos preferences et vos favoris.</p>
             <div class="account-actions">
-              <button type="button" class="account-btn">
+              <button id="googleAuthBtn" type="button" class="account-btn" aria-label="Continuer avec Google">
                 <span class="account-provider-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" class="account-provider-svg">
                     <path fill="currentColor" d="M21.8 12.2c0-.7-.1-1.3-.2-1.8H12v3.4h5.5c-.2 1.4-1 2.6-2.1 3.4v2.8h3.4c2-1.8 3-4.5 3-7.8Z"/>
@@ -51,15 +51,7 @@
                     <path fill="currentColor" d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9C16.9 2.9 14.7 2 12 2 8.1 2 4.8 4.1 3.1 7l3.5 2.9c.8-2.3 2.9-3.9 5.4-3.9Z"/>
                   </svg>
                 </span>
-                <span>Continuer avec Google</span>
-              </button>
-              <button type="button" class="account-btn">
-                <span class="account-provider-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" class="account-provider-svg">
-                    <path fill="currentColor" d="M16.7 12.8c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.7-1.7-3.3-1.8-1.4-.1-2.7.8-3.4.8-.7 0-1.8-.8-3-.8-1.5 0-2.9.9-3.7 2.2-1.6 2.8-.4 6.9 1.2 9.2.8 1.1 1.7 2.4 3 2.3 1.2 0 1.7-.7 3.2-.7s1.9.7 3.2.7c1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.5 1.3-2.6 0 0-2.5-1-2.5-3.6ZM14.4 6.1c.6-.8 1-1.9.9-3.1-.9 0-2 .6-2.6 1.4-.6.7-1.1 1.9-1 3 .9.1 2-.5 2.7-1.3Z"/>
-                  </svg>
-                </span>
-                <span>Continuer avec Apple ID</span>
+                <span id="googleAuthBtnLabel">Continuer avec Google</span>
               </button>
             </div>
           </section>

@@ -8,6 +8,7 @@ import { initTileExpander } from './components/TileExpander.js';
 import { initInfoArticleReader } from './components/InfoArticleReader.js';
 import { fetchRestaurants } from './services/restaurants.js';
 import { fetchRecipes } from './services/recipes.js';
+import { observeAuthState, readRedirectResult, signInWithGoogle, signOutUser } from './services/auth.js';
 
 const views = [...document.querySelectorAll('.view')];
 const navItems = [...document.querySelectorAll('.nav-item')];
@@ -23,6 +24,9 @@ const geotagElement = document.querySelector('.location-wrap');
 
 const menuButton = document.querySelector('.menu-btn');
 const optionsMenuElement = document.getElementById('optionsMenu');
+const googleAuthButton = document.getElementById('googleAuthBtn');
+const googleAuthButtonLabel = document.getElementById('googleAuthBtnLabel');
+const accountStatus = document.getElementById('accountStatus');
 
 const tileOverlay = document.getElementById('tileOverlay');
 const tileExpanderElement = document.getElementById('tileExpander');
@@ -32,6 +36,41 @@ const infoReaderClose = document.getElementById('infoReaderClose');
 const infoReaderTitle = document.getElementById('infoReaderTitle');
 const infoReaderBody = document.getElementById('infoReaderBody');
 
+const ROUTE_TAB_TO_VIEW = {
+  restaurants: 'restaurantsView',
+  recipes: 'recipesView',
+  infos: 'infosView'
+};
+const ROUTE_VIEW_TO_TAB = {
+  restaurantsView: 'restaurants',
+  recipesView: 'recipes',
+  infosView: 'infos'
+};
+const ROUTE_ITEM_TYPE_TO_TAB = {
+  restaurant: 'restaurants',
+  recipe: 'recipes',
+  info: 'infos'
+};
+const ROUTE_ITEM_TYPE_TO_PARAM = {
+  restaurant: 'restaurant',
+  recipe: 'recipe',
+  info: 'info'
+};
+const ROUTE_KEYS = ['tab', 'restaurant', 'recipe', 'info'];
+const DEFAULT_ACCOUNT_STATUS = 'Connectez-vous pour retrouver vos preferences et vos favoris.';
+
+let routeState = {
+  tab: 'restaurants',
+  item: null
+};
+let pendingRouteItem = null;
+let restaurantsLoaded = false;
+let recipesLoaded = false;
+let suppressTileCloseRouteSync = false;
+let suppressInfoCloseRouteSync = false;
+let authUser = null;
+let authRequestInFlight = false;
+
 function pushDataLayerEvent(eventName, payload = {}) {
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
@@ -40,8 +79,466 @@ function pushDataLayerEvent(eventName, payload = {}) {
   });
 }
 
+function getAuthErrorMessage(error) {
+  const code = error?.code || '';
+
+  if (code === 'auth/popup-closed-by-user') {
+    return 'Connexion annulee.';
+  }
+
+  if (code === 'auth/cancelled-popup-request') {
+    return 'Une connexion Google est deja en cours.';
+  }
+
+  if (code === 'auth/unauthorized-domain') {
+    return 'Ce domaine nest pas autorise dans Firebase Authentication.';
+  }
+
+  if (code === 'auth/operation-not-allowed') {
+    return 'La methode Google nest pas activee dans Firebase Authentication.';
+  }
+
+  if (code === 'auth/network-request-failed') {
+    return 'Probleme reseau pendant la connexion.';
+  }
+
+  return 'Impossible de finaliser la connexion Google pour le moment.';
+}
+
+function setAccountStatus(message = '', { isError = false } = {}) {
+  if (!accountStatus) {
+    return;
+  }
+
+  accountStatus.textContent = message;
+  accountStatus.classList.toggle('error', isError);
+}
+
+function getAuthButtonLabel() {
+  if (authRequestInFlight) {
+    return authUser ? 'Déconnexion...' : 'Connexion...';
+  }
+
+  return authUser ? 'Se déconnecter' : 'Continuer avec Google';
+}
+
+function syncAuthButton() {
+  if (!googleAuthButton) {
+    return;
+  }
+
+  const label = getAuthButtonLabel();
+  if (googleAuthButtonLabel) {
+    googleAuthButtonLabel.textContent = label;
+  }
+
+  googleAuthButton.setAttribute('aria-label', label);
+  googleAuthButton.disabled = authRequestInFlight;
+}
+
+function getAccountDisplayName(user) {
+  const displayName = String(user?.displayName || '').trim();
+  if (displayName) {
+    return displayName;
+  }
+
+  const email = String(user?.email || '').trim();
+  if (email) {
+    return email;
+  }
+
+  return 'cet utilisateur';
+}
+
+function renderAuthState(nextUser) {
+  authUser = nextUser || null;
+
+  if (!accountStatus) {
+    return;
+  }
+
+  if (!authUser) {
+    setAccountStatus(DEFAULT_ACCOUNT_STATUS);
+    return;
+  }
+
+  const accountName = getAccountDisplayName(authUser);
+  setAccountStatus(`Connecté en tant que ${accountName}.`);
+}
+
+function syncAuthDataLayer(previousUser, nextUser) {
+  const previousUid = previousUser?.uid || null;
+  const nextUid = nextUser?.uid || null;
+
+  if (previousUid === nextUid) {
+    return;
+  }
+
+  if (nextUid) {
+    pushDataLayerEvent('login', {
+      auth_provider: 'google',
+      user_id: nextUid
+    });
+    return;
+  }
+
+  if (previousUid) {
+    pushDataLayerEvent('logout', {
+      auth_provider: 'google',
+      user_id: previousUid
+    });
+  }
+}
+
+function reportAuthError(error, { redirect = false } = {}) {
+  const code = error?.code || 'unknown';
+  const message = getAuthErrorMessage(error);
+
+  console.error('Google authentication failed.', error);
+  setAccountStatus(message, { isError: true });
+  pushDataLayerEvent('auth_error', {
+    auth_provider: 'google',
+    auth_error_code: code,
+    auth_mode: redirect ? 'redirect' : 'popup'
+  });
+}
+
+function initGoogleAuth() {
+  if (!googleAuthButton) {
+    return;
+  }
+
+  googleAuthButton.addEventListener('click', async () => {
+    if (authRequestInFlight) {
+      return;
+    }
+
+    authRequestInFlight = true;
+    setAccountStatus(authUser ? 'Déconnexion en cours...' : 'Connexion en cours...');
+    syncAuthButton();
+
+    try {
+      if (authUser) {
+        await signOutUser();
+      } else {
+        await signInWithGoogle();
+      }
+    } catch (error) {
+      authRequestInFlight = false;
+      syncAuthButton();
+      reportAuthError(error);
+    }
+  });
+
+  observeAuthState((nextUser) => {
+    const previousUser = authUser;
+
+    renderAuthState(nextUser);
+    authRequestInFlight = false;
+    syncAuthButton();
+    syncAuthDataLayer(previousUser, nextUser);
+  });
+
+  readRedirectResult().catch((error) => {
+    reportAuthError(error, { redirect: true });
+  });
+
+  syncAuthButton();
+}
+
+function toRouteId(...values) {
+  for (const value of values) {
+    const normalized = String(value || '').trim();
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return '';
+}
+
+function normalizeRouteTab(tab) {
+  return ROUTE_TAB_TO_VIEW[tab] ? tab : 'restaurants';
+}
+
+function normalizeRouteItem(item) {
+  if (!item || typeof item !== 'object') {
+    return null;
+  }
+
+  const type = typeof item.type === 'string' ? item.type : '';
+  const id = typeof item.id === 'string' ? item.id.trim() : '';
+  if (!ROUTE_ITEM_TYPE_TO_PARAM[type] || !id) {
+    return null;
+  }
+
+  return {
+    type,
+    id
+  };
+}
+
+function normalizeRouteState(state) {
+  const tab = normalizeRouteTab(state?.tab);
+  const item = normalizeRouteItem(state?.item);
+  if (!item) {
+    return { tab, item: null };
+  }
+
+  const routeTabForItem = ROUTE_ITEM_TYPE_TO_TAB[item.type];
+  if (!routeTabForItem) {
+    return { tab, item: null };
+  }
+
+  if (routeTabForItem !== tab) {
+    return { tab: routeTabForItem, item };
+  }
+
+  return { tab, item };
+}
+
+function isSameRouteState(left, right) {
+  const leftItem = left?.item;
+  const rightItem = right?.item;
+
+  if (left?.tab !== right?.tab) {
+    return false;
+  }
+
+  if (!leftItem && !rightItem) {
+    return true;
+  }
+
+  if (!leftItem || !rightItem) {
+    return false;
+  }
+
+  return leftItem.type === rightItem.type && leftItem.id === rightItem.id;
+}
+
+function parseRouteStateFromLocation() {
+  const params = new URLSearchParams(window.location.search);
+  const explicitTab = params.get('tab');
+  let item = null;
+
+  const restaurantId = params.get('restaurant');
+  const recipeId = params.get('recipe');
+  const infoId = params.get('info');
+
+  if (restaurantId) {
+    item = { type: 'restaurant', id: restaurantId };
+  } else if (recipeId) {
+    item = { type: 'recipe', id: recipeId };
+  } else if (infoId) {
+    item = { type: 'info', id: infoId };
+  }
+
+  const inferredTab = item ? ROUTE_ITEM_TYPE_TO_TAB[item.type] : 'restaurants';
+  return normalizeRouteState({
+    tab: explicitTab || inferredTab,
+    item
+  });
+}
+
+function buildRouteUrl(nextRouteState) {
+  const normalized = normalizeRouteState(nextRouteState);
+  const url = new URL(window.location.href);
+
+  ROUTE_KEYS.forEach((key) => url.searchParams.delete(key));
+  url.searchParams.set('tab', normalized.tab);
+
+  if (normalized.item) {
+    const paramName = ROUTE_ITEM_TYPE_TO_PARAM[normalized.item.type];
+    if (paramName) {
+      url.searchParams.set(paramName, normalized.item.id);
+    }
+  }
+
+  const query = url.searchParams.toString();
+  return `${url.pathname}${query ? `?${query}` : ''}${url.hash}`;
+}
+
+function writeRouteToHistory(nextRouteState, { replace = false } = {}) {
+  const nextUrl = buildRouteUrl(nextRouteState);
+  const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  if (nextUrl === currentUrl) {
+    return;
+  }
+
+  const method = replace ? 'replaceState' : 'pushState';
+  window.history[method](nextRouteState, '', nextUrl);
+}
+
+function setRouteState(nextRouteState, { replace = false } = {}) {
+  const normalized = normalizeRouteState(nextRouteState);
+  const changed = !isSameRouteState(routeState, normalized);
+
+  routeState = normalized;
+  pendingRouteItem = normalized.item ? { ...normalized.item } : null;
+
+  if (changed || replace) {
+    writeRouteToHistory(normalized, { replace });
+  }
+
+  return normalized;
+}
+
+function updateRouteFromUI(patch, { replace = false } = {}) {
+  const hasItemPatch = Object.prototype.hasOwnProperty.call(patch, 'item');
+  const nextRouteState = normalizeRouteState({
+    tab: typeof patch.tab === 'string' ? patch.tab : routeState.tab,
+    item: hasItemPatch ? patch.item : routeState.item
+  });
+
+  setRouteState(nextRouteState, { replace });
+}
+
+function findTileByRouteId(target, routeId) {
+  if (!target || !routeId) {
+    return null;
+  }
+
+  const tiles = target.querySelectorAll('.tile[data-route-id]');
+  for (const tile of tiles) {
+    if (tile.dataset.routeId === routeId) {
+      return tile;
+    }
+  }
+
+  return null;
+}
+
+function tryOpenPendingRouteItem() {
+  if (!pendingRouteItem) {
+    return;
+  }
+
+  const { type, id } = pendingRouteItem;
+  if (type === 'info') {
+    const infoItem = infoItemsById.get(id);
+    if (!infoItem) {
+      updateRouteFromUI({ item: null }, { replace: true });
+      return;
+    }
+
+    infoReader.open(infoItem);
+    pendingRouteItem = null;
+    return;
+  }
+
+  if (type === 'restaurant') {
+    if (!restaurantsLoaded) {
+      return;
+    }
+
+    const openRestaurantTile = () => {
+      if (!pendingRouteItem || pendingRouteItem.type !== 'restaurant' || pendingRouteItem.id !== id) {
+        return;
+      }
+
+      const tileElement = findTileByRouteId(restaurantList, id);
+      if (!tileElement) {
+        updateRouteFromUI({ item: null }, { replace: true });
+        return;
+      }
+
+      tileExpander.open(tileElement);
+      pendingRouteItem = null;
+    };
+
+    if (tileExpander.isOpen()) {
+      if (tileExpander.getActiveRouteId() === id) {
+        pendingRouteItem = null;
+        return;
+      }
+
+      suppressTileCloseRouteSync = true;
+      tileExpander.close();
+      window.setTimeout(openRestaurantTile, 430);
+      return;
+    }
+
+    const tileElement = findTileByRouteId(restaurantList, id);
+    if (!tileElement) {
+      updateRouteFromUI({ item: null }, { replace: true });
+      return;
+    }
+
+    tileExpander.open(tileElement);
+    pendingRouteItem = null;
+    return;
+  }
+
+  if (type === 'recipe') {
+    if (!recipesLoaded) {
+      return;
+    }
+
+    const openRecipeTile = () => {
+      if (!pendingRouteItem || pendingRouteItem.type !== 'recipe' || pendingRouteItem.id !== id) {
+        return;
+      }
+
+      const tileElement = findTileByRouteId(recipeList, id);
+      if (!tileElement) {
+        updateRouteFromUI({ item: null }, { replace: true });
+        return;
+      }
+
+      tileExpander.open(tileElement);
+      pendingRouteItem = null;
+    };
+
+    if (tileExpander.isOpen()) {
+      if (tileExpander.getActiveRouteId() === id) {
+        pendingRouteItem = null;
+        return;
+      }
+
+      suppressTileCloseRouteSync = true;
+      tileExpander.close();
+      window.setTimeout(openRecipeTile, 430);
+      return;
+    }
+
+    const tileElement = findTileByRouteId(recipeList, id);
+    if (!tileElement) {
+      updateRouteFromUI({ item: null }, { replace: true });
+      return;
+    }
+
+    tileExpander.open(tileElement);
+    pendingRouteItem = null;
+    return;
+  }
+
+  updateRouteFromUI({ item: null }, { replace: true });
+}
+
+function applyRouteState(nextRouteState, { replace = false } = {}) {
+  const normalized = setRouteState(nextRouteState, { replace });
+  switchView(ROUTE_TAB_TO_VIEW[normalized.tab]);
+
+  const wantsInfoOpen = normalized.item?.type === 'info';
+  const wantsTileOpen =
+    normalized.item?.type === 'restaurant' || normalized.item?.type === 'recipe';
+
+  if (!wantsInfoOpen && infoReader.isOpen()) {
+    suppressInfoCloseRouteSync = true;
+    infoReader.close();
+  }
+
+  if (!wantsTileOpen && tileExpander.isOpen()) {
+    suppressTileCloseRouteSync = true;
+    tileExpander.close();
+  }
+
+  tryOpenPendingRouteItem();
+}
+
 const infos = [
   {
+    id: 'info-bun',
     title: 'Comment choisir un bun',
     summary: 'Un bun moelleux qui reste stable avec la sauce aide a garder un burger propre a manger.',
     content: [
@@ -51,6 +548,7 @@ const infos = [
     ]
   },
   {
+    id: 'info-cuisson-steak',
     title: 'Cuisson du steak',
     summary: 'Une plaque tres chaude et un temps court donnent une bonne croute et un coeur juteux.',
     content: [
@@ -60,6 +558,7 @@ const infos = [
     ]
   },
   {
+    id: 'info-ordre-montage',
     title: 'Ordre de montage',
     summary: 'Base sauce, salade, steak et toppings: cet ordre limite l humidite sur le pain du bas.',
     content: [
@@ -69,6 +568,7 @@ const infos = [
     ]
   },
   {
+    id: 'info-sauces-equilibre',
     title: 'Sauces et equilibre',
     summary: 'Reste sur une sauce principale puis un accent acidule pour eviter un burger trop lourd.',
     content: [
@@ -78,6 +578,7 @@ const infos = [
     ]
   }
 ];
+const infoItemsById = new Map(infos.map((item) => [item.id, item]));
 
 const geotag = initGeotag({ element: geotagElement, threshold: 28 });
 const burgerIcon = initBurgerIcon(menuButton);
@@ -94,13 +595,29 @@ const tileExpander = initTileExpander({
   overlay: tileOverlay,
   expander: tileExpanderElement,
   closeButton: tileCloseButton,
-  inset: 12
+  inset: 12,
+  onClose: () => {
+    if (suppressTileCloseRouteSync) {
+      suppressTileCloseRouteSync = false;
+      return;
+    }
+
+    updateRouteFromUI({ item: null });
+  }
 });
 const infoReader = initInfoArticleReader({
   overlay: infoReaderOverlay,
   titleElement: infoReaderTitle,
   bodyElement: infoReaderBody,
-  closeButton: infoReaderClose
+  closeButton: infoReaderClose,
+  onClose: () => {
+    if (suppressInfoCloseRouteSync) {
+      suppressInfoCloseRouteSync = false;
+      return;
+    }
+
+    updateRouteFromUI({ item: null });
+  }
 });
 
 const bottomTabs = initBottomTabs({
@@ -119,6 +636,10 @@ const bottomTabs = initBottomTabs({
       tab_label: tabLabel
     });
     switchView(viewId);
+    updateRouteFromUI({
+      tab: ROUTE_VIEW_TO_TAB[viewId] || 'restaurants',
+      item: null
+    });
   }
 });
 
@@ -177,7 +698,8 @@ function mapTileSizeToClass(size) {
 }
 
 function renderRestaurants(restaurants) {
-  const restaurantTiles = restaurants.map((restaurant) => ({
+  const restaurantTiles = restaurants.map((restaurant, index) => ({
+    routeId: toRouteId(restaurant.id, `restaurant-${index}`),
     name: restaurant.name,
     meta: restaurant.area,
     size: mapTileSizeToClass(restaurant.size)
@@ -193,6 +715,10 @@ function renderRestaurants(restaurants) {
         item_category: 'restaurant'
       });
       tileExpander.open(tileElement);
+      updateRouteFromUI({
+        tab: 'restaurants',
+        item: { type: 'restaurant', id: item.routeId }
+      });
     }
   });
 
@@ -206,11 +732,15 @@ async function loadRestaurants() {
   } catch (error) {
     console.error('Failed to load restaurants from Firestore.', error);
     renderRestaurants([]);
+  } finally {
+    restaurantsLoaded = true;
+    tryOpenPendingRouteItem();
   }
 }
 
 function renderRecipes(recipes) {
-  const recipeTiles = recipes.map((recipe) => ({
+  const recipeTiles = recipes.map((recipe, index) => ({
+    routeId: toRouteId(recipe.id, `recipe-${index}`),
     name: recipe.name,
     meta: '',
     size: mapTileSizeToClass(recipe.size),
@@ -228,6 +758,10 @@ function renderRecipes(recipes) {
         item_category: 'recipe'
       });
       tileExpander.open(tileElement);
+      updateRouteFromUI({
+        tab: 'recipes',
+        item: { type: 'recipe', id: item.routeId }
+      });
     }
   });
 
@@ -241,26 +775,40 @@ async function loadRecipes() {
   } catch (error) {
     console.error('Failed to load recipes from Firestore.', error);
     renderRecipes([]);
+  } finally {
+    recipesLoaded = true;
+    tryOpenPendingRouteItem();
   }
 }
 
 renderInfoArticlesCollection({
   items: infos,
   target: infoList,
-  onArticleOpen: (item) => infoReader.open(item)
+  onArticleOpen: (item) => {
+    infoReader.open(item);
+    updateRouteFromUI({
+      tab: 'infos',
+      item: { type: 'info', id: item.id }
+    });
+  }
 });
-updateActiveViewHeight();
+
+initGoogleAuth();
+applyRouteState(parseRouteStateFromLocation(), { replace: true });
 geotag.locate();
 loadRestaurants();
 loadRecipes();
 geotag.update();
-switchView('restaurantsView');
 
 window.addEventListener('resize', () => {
   const activeView = document.querySelector('.view.active');
   if (activeView) {
     updateViewportHeight(activeView);
   }
+});
+
+window.addEventListener('popstate', () => {
+  applyRouteState(parseRouteStateFromLocation(), { replace: true });
 });
 
 document.addEventListener('keydown', (event) => {

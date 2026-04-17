@@ -1,4 +1,4 @@
-export function initInfoArticleReader({ overlay, titleElement, bodyElement, closeButton }) {
+export function initInfoArticleReader({ overlay, titleElement, bodyElement, closeButton, onClose = null }) {
   if (!overlay || !titleElement || !bodyElement) {
     return {
       open: () => {},
@@ -32,9 +32,17 @@ export function initInfoArticleReader({ overlay, titleElement, bodyElement, clos
   };
 
   const close = () => {
+    if (!isOpen()) {
+      return;
+    }
+
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('info-open');
+
+    if (typeof onClose === 'function') {
+      onClose();
+    }
   };
 
   const onOverlayClick = (event) => {

@@ -66,10 +66,15 @@ body.menu-open .topbar {
 
 .account-copy {
   margin: 0;
+  min-height: 1.35em;
   font-size: var(--options-content-size);
   line-height: var(--options-content-line-height);
   font-weight: 400;
   color: #444444;
+}
+
+.account-copy.error {
+  color: #c30f00;
 }
 
 .account-actions {
@@ -91,6 +96,10 @@ body.menu-open .topbar {
   font-weight: 400;
   text-align: left;
   width: 100%;
+}
+
+.account-btn[disabled] {
+  opacity: 0.65;
 }
 
 .account-provider-icon {

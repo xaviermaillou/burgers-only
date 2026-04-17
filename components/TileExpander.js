@@ -1,4 +1,4 @@
-export function initTileExpander({ overlay, expander, closeButton, inset = 12 }) {
+export function initTileExpander({ overlay, expander, closeButton, inset = 12, onClose = null }) {
   if (!overlay || !expander) {
     return {
       open: () => {},
@@ -151,6 +151,9 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12 })
       expander.innerHTML = '';
       activeTileElement = null;
       isAnimating = false;
+      if (typeof onClose === 'function') {
+        onClose();
+      }
     });
   };
 
@@ -171,6 +174,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12 })
     open,
     close,
     isOpen: () => overlay.classList.contains('open'),
+    getActiveRouteId: () => activeTileElement?.dataset?.routeId || null,
     handleEscape(event) {
       if (event.key === 'Escape' && overlay.classList.contains('open')) {
         close();
