@@ -125,6 +125,21 @@
     </nav>
   </div>
 
-  <script type="module" src="app.js"></script>
+  <script>
+    (function loadAppScript() {
+      const productionHosts = new Set([
+        "burgers-only.web.app",
+        "burgers-only.firebaseapp.com",
+        "burgersonly.lu"
+      ]);
+      const isProductionHost = productionHosts.has(window.location.hostname);
+      const script = document.createElement("script");
+
+      script.src = isProductionHost ? "build/app.js" : "app.js";
+      script.type = "module";
+
+      document.body.appendChild(script);
+    })();
+  </script>
 </body>
 </html>

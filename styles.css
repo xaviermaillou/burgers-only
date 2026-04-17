@@ -15,6 +15,8 @@
   --tile-ink-muted: rgba(255, 255, 255, 0.86);
   --gap: 18px;
   --header-top: calc(env(safe-area-inset-top, 0px) + 18px);
+  --nav-top-offset: calc(var(--header-top) + 40px);
+  --nav-height: 88px;
 }
 
 * {
@@ -33,6 +35,13 @@ body {
   min-height: 100vh;
   padding: calc(env(safe-area-inset-top, 0px) + 90px) 20px 104px;
   background: #ffffff;
+}
+
+body.nav-top .app-shell {
+  padding:
+    calc(var(--nav-top-offset) + var(--nav-height) + 10px)
+    20px
+    calc(env(safe-area-inset-bottom, 0px) + 18px);
 }
 
 .views-viewport {

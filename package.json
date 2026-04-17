@@ -15,9 +15,13 @@
   "type": "commonjs",
   "main": "app.js",
   "scripts": {
+    "build": "esbuild app.js --bundle --format=esm --minify --sourcemap --outdir=build",
     "test": "test"
   },
   "dependencies": {
     "@growthbook/growthbook": "^1.6.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
   }
 }
