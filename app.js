@@ -127,7 +127,17 @@ function updateViewportHeight(activeView) {
     return;
   }
 
-  viewsViewport.style.minHeight = `${activeView.offsetHeight}px`;
+  const nextHeight = Math.max(activeView.scrollHeight, activeView.offsetHeight);
+  viewsViewport.style.height = `${nextHeight}px`;
+}
+
+function updateActiveViewHeight() {
+  const activeView = document.querySelector('.view.active');
+  if (!activeView) {
+    return;
+  }
+
+  updateViewportHeight(activeView);
 }
 
 function switchView(viewId) {
@@ -185,6 +195,8 @@ function renderRestaurants(restaurants) {
       tileExpander.open(tileElement);
     }
   });
+
+  updateActiveViewHeight();
 }
 
 async function loadRestaurants() {
@@ -218,6 +230,8 @@ function renderRecipes(recipes) {
       tileExpander.open(tileElement);
     }
   });
+
+  updateActiveViewHeight();
 }
 
 async function loadRecipes() {
@@ -235,6 +249,7 @@ renderInfoArticlesCollection({
   target: infoList,
   onArticleOpen: (item) => infoReader.open(item)
 });
+updateActiveViewHeight();
 geotag.locate();
 loadRestaurants();
 loadRecipes();
