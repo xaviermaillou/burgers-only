@@ -11,6 +11,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
 
   let activeTileElement = null;
   let isAnimating = false;
+  let cleanupRunId = 0;
 
   const readExpandedList = (tileElement) => {
     try {
@@ -53,11 +54,37 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     window.setTimeout(finalize, 420);
   };
 
+  const waitOverlayFadeOut = (callback) => {
+    let done = false;
+
+    const finalize = () => {
+      if (done) {
+        return;
+      }
+
+      done = true;
+      overlay.removeEventListener('transitionend', onEnd);
+      callback();
+    };
+
+    const onEnd = (event) => {
+      if (event.target !== overlay || event.propertyName !== 'opacity') {
+        return;
+      }
+
+      finalize();
+    };
+
+    overlay.addEventListener('transitionend', onEnd);
+    window.setTimeout(finalize, 280);
+  };
+
   const open = (tileElement) => {
     if (!tileElement || isAnimating || document.body.classList.contains('menu-open')) {
       return;
     }
 
+    cleanupRunId += 1;
     isAnimating = true;
     activeTileElement = tileElement;
 
@@ -74,6 +101,31 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     const expandedList = readExpandedList(tileElement);
     const content = document.createElement('div');
     content.className = 'tile-expander-content';
+    const imageUrl = tileElement.dataset.image || '';
+    const maskUrl = tileElement.dataset.maskUrl || '';
+
+    if (imageUrl) {
+      const baseImage = document.createElement('img');
+      baseImage.src = imageUrl;
+      baseImage.alt = '';
+      baseImage.className = 'tile-expander-image-base';
+
+      content.appendChild(baseImage);
+
+      if (maskUrl) {
+        content.style.setProperty('--tile-mask-url', `url("${maskUrl}")`);
+
+        const maskedImage = document.createElement('img');
+        maskedImage.src = imageUrl;
+        maskedImage.alt = '';
+        maskedImage.className = 'tile-expander-image-mask';
+        content.appendChild(maskedImage);
+      }
+
+      const veilLayer = document.createElement('div');
+      veilLayer.className = 'tile-expander-veil';
+      content.appendChild(veilLayer);
+    }
 
     const top = document.createElement('div');
     top.className = 'tile-expander-top';
@@ -117,6 +169,9 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     expander.style.transition = '';
 
     overlay.classList.add('open');
+    if (imageUrl) {
+      overlay.classList.add('has-image-open');
+    }
     overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('tile-open');
 
@@ -136,6 +191,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
       return;
     }
 
+    const currentCleanupRunId = ++cleanupRunId;
     isAnimating = true;
     const toRect = activeTileElement.getBoundingClientRect();
 
@@ -146,14 +202,21 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     waitAnimationEnd(() => {
       expander.classList.remove('is-collapsing');
       overlay.classList.remove('open');
+      overlay.classList.remove('has-image-open');
       overlay.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('tile-open');
-      expander.innerHTML = '';
       activeTileElement = null;
       isAnimating = false;
       if (typeof onClose === 'function') {
         onClose();
       }
+      waitOverlayFadeOut(() => {
+        if (currentCleanupRunId !== cleanupRunId || overlay.classList.contains('open')) {
+          return;
+        }
+
+        expander.innerHTML = '';
+      });
     });
   };
 

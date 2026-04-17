@@ -8,31 +8,16 @@ import {
 import { db } from './firebase.js';
 
 const COLLECTION_NAME = 'restaurants';
-const RESTAURANT_SIZE_BY_INDEX = {
-  0: 'l',
-  1: 's',
-  2: 's',
-  3: 'm',
-  4: 'm',
-  5: 's',
-  6: 'm',
-  7: 's',
-  8: 'm',
-  9: 's'
-};
 
-function getRestaurantSize(index) {
-  return RESTAURANT_SIZE_BY_INDEX[index] || 's';
-}
-
-async function normalizeRestaurant(doc, index) {
+async function normalizeRestaurant(doc) {
   const data = doc.data();
 
   return {
     id: doc.id,
     name: data.name || '',
     area: data.area || '',
-    size: getRestaurantSize(index)
+    geo: data.geo || null,
+    image: data.image || data.photo_url || ''
   };
 }
 
@@ -43,7 +28,7 @@ function restaurantsQuery() {
 export async function fetchRestaurants() {
   try {
     const snapshot = await getDocs(restaurantsQuery());
-    return Promise.all(snapshot.docs.map((doc, index) => normalizeRestaurant(doc, index)));
+    return Promise.all(snapshot.docs.map((doc) => normalizeRestaurant(doc)));
   } catch (error) {
     throw error;
   }
@@ -55,7 +40,7 @@ export function subscribeRestaurants(onUpdate, onError) {
     async (snapshot) => {
       try {
         const restaurants = await Promise.all(
-          snapshot.docs.map((doc, index) => normalizeRestaurant(doc, index))
+          snapshot.docs.map((doc) => normalizeRestaurant(doc))
         );
         if (typeof onUpdate === 'function') {
           onUpdate(restaurants);

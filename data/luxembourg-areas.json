@@ -130,5 +130,12 @@
     "maxLat": 49.66,
     "minLon": 6.12,
     "maxLon": 6.42
+  },
+  {
+    "name": "Hors Luxembourg",
+    "minLat": -90,
+    "maxLat": 90,
+    "minLon": -180,
+    "maxLon": 180
   }
 ]

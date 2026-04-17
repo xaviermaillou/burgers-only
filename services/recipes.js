@@ -46,6 +46,7 @@ async function normalizeRecipe(doc, index) {
     id: doc.id,
     name: data.name || '',
     overview: data.overview || '',
+    image: data.image || '',
     ingredients: ingredients.filter(Boolean),
     size: getRecipeSize(index)
   };

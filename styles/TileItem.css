@@ -1,4 +1,5 @@
 .tile {
+  --tile-mask-url: none;
   border: 4px solid #111111;
   background: #ffffff;
   color: #111111;
@@ -76,4 +77,45 @@
 
 .recipe-tile {
   box-shadow: 6px 6px 0 0 #f05aa6;
+}
+
+.tile-bg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tile:not(.tile-expander).has-image .tile-bg-image {
+  z-index: 0;
+  -webkit-mask-image: var(--tile-mask-url);
+  mask-image: var(--tile-mask-url);
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+.tile:not(.tile-expander).has-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.58);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tile-title,
+.tile-kicker,
+.tile-expanded-body,
+.tile-expanded-list {
+  position: relative;
+  z-index: 2;
 }
