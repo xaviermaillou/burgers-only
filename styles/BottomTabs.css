@@ -11,17 +11,18 @@
 }
 
 body.nav-top .bottom-nav {
-  top: var(--nav-top-offset);
-  left: 20px;
-  right: 20px;
+  top: 0;
+  left: 0;
+  right: 0;
   bottom: auto;
-  width: auto;
+  width: 100%;
+  padding-top: var(--nav-top-padding);
   z-index: 35;
-  transition: top 260ms ease;
+  transition: padding-top 260ms ease;
 }
 
 body.nav-top.geotag-hidden .bottom-nav {
-  top: env(safe-area-inset-top, 0px);
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .bottom-nav::before {
@@ -51,8 +52,7 @@ body.nav-top .bottom-nav::before {
 }
 
 body.nav-top .bottom-nav-track {
-  gap: 16px;
-  padding: 8px 0 12px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
 }
 
 .nav-item {
@@ -80,10 +80,6 @@ body.nav-top .bottom-nav-track {
   white-space: nowrap;
   transition: color 260ms ease, opacity 260ms ease;
   opacity: 0.72;
-}
-
-body.nav-top .nav-label {
-  font-size: clamp(1.9rem, 4.8vw, 2.5rem);
 }
 
 .nav-item.active .nav-label {

@@ -16,6 +16,8 @@
   --tile-ink-muted: rgba(255, 255, 255, 0.86);
   --gap: 18px;
   --header-top: calc(env(safe-area-inset-top, 0px) + 18px);
+  --geotag-height: 28px;
+  --nav-top-padding: calc(var(--header-top) + var(--geotag-height) + 8px);
   --nav-top-offset: calc(var(--header-top) + 40px);
   --nav-height: 88px;
 }

@@ -124,8 +124,10 @@ function applyNavTabsOrder(orderValue) {
   }
 
   navTabsOrderVariant = nextOrderVariant;
+  const activeViewId = document.querySelector('.view.active')?.id || null;
 
   const itemsByTarget = new Map(navItems.map((item) => [item.dataset.viewTarget, item]));
+  const viewsById = new Map(views.map((view) => [view.id, view]));
   const orderedTargets = getNavTabsOrderTargets(navTabsOrderVariant);
 
   orderedTargets.forEach((viewTarget) => {
@@ -133,9 +135,27 @@ function applyNavTabsOrder(orderValue) {
     if (item) {
       bottomNavTrack.appendChild(item);
     }
+
+    const view = viewsById.get(viewTarget);
+    if (view && viewsTrack) {
+      viewsTrack.appendChild(view);
+    }
   });
 
   initOrRefreshBottomTabs();
+
+  if (activeViewId && viewsTrack) {
+    const orderedViews = [...viewsTrack.querySelectorAll('.view')];
+    const activeIndex = Math.max(
+      0,
+      orderedViews.findIndex((view) => view.id === activeViewId)
+    );
+    viewsTrack.style.setProperty('--view-index', String(activeIndex));
+    if (bottomTabs) {
+      bottomTabs.setActive(activeViewId);
+    }
+  }
+
   updateTopNavLayoutMetrics();
 }
 
@@ -155,9 +175,13 @@ function updateTopNavLayoutMetrics() {
 
   const topbarBottom = topbar?.getBoundingClientRect()?.bottom || 0;
   const navHeight = bottomNav.getBoundingClientRect().height || 0;
+  const geotagHeight = geotagElement?.getBoundingClientRect()?.height || 0;
   const navTopOffset = Math.max(0, Math.ceil(topbarBottom + 8));
   const measuredNavHeight = Math.max(0, Math.ceil(navHeight));
+  const measuredGeotagHeight = Math.max(0, Math.ceil(geotagHeight));
 
+  document.documentElement.style.setProperty('--geotag-height', `${measuredGeotagHeight}px`);
+  document.documentElement.style.setProperty('--nav-top-padding', `${navTopOffset}px`);
   document.documentElement.style.setProperty('--nav-top-offset', `${navTopOffset}px`);
   document.documentElement.style.setProperty('--nav-height', `${measuredNavHeight}px`);
 }
@@ -168,6 +192,8 @@ function applyNavPosition(position) {
   document.body.classList.toggle('nav-top', isTopNav);
 
   if (!isTopNav) {
+    document.documentElement.style.removeProperty('--geotag-height');
+    document.documentElement.style.removeProperty('--nav-top-padding');
     document.documentElement.style.removeProperty('--nav-top-offset');
     document.documentElement.style.removeProperty('--nav-height');
     window.requestAnimationFrame(() => {
@@ -206,16 +232,17 @@ function updateActiveViewHeight() {
 }
 
 function switchView(viewId) {
-  let activeIndex = 0;
-  let activeView = views[0] || null;
+  const orderedViews = viewsTrack ? [...viewsTrack.querySelectorAll('.view')] : views;
+  const nextActiveIndex = orderedViews.findIndex((view) => view.id === viewId);
+  const activeIndex = nextActiveIndex >= 0 ? nextActiveIndex : 0;
+  let activeView = orderedViews[activeIndex] || views[0] || null;
 
-  views.forEach((view, index) => {
+  views.forEach((view) => {
     const isTarget = view.id === viewId;
     view.classList.toggle('active', isTarget);
     view.setAttribute('aria-hidden', String(!isTarget));
 
     if (isTarget) {
-      activeIndex = index;
       activeView = view;
     }
   });
