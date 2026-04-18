@@ -43,6 +43,11 @@ body.nav-top .app-shell {
     calc(var(--nav-top-offset) + var(--nav-height) + 10px)
     20px
     calc(env(safe-area-inset-bottom, 0px) + 18px);
+  transition: padding-top 260ms ease;
+}
+
+body.nav-top.geotag-hidden .app-shell {
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + 10px);
 }
 
 .views-viewport {

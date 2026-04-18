@@ -17,6 +17,11 @@ body.nav-top .bottom-nav {
   bottom: auto;
   width: auto;
   z-index: 35;
+  transition: top 260ms ease;
+}
+
+body.nav-top.geotag-hidden .bottom-nav {
+  top: env(safe-area-inset-top, 0px);
 }
 
 .bottom-nav::before {

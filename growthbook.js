@@ -1,4 +1,4 @@
-import { GrowthBook } from "https://esm.sh/@growthbook/growthbook@1.6.5?bundle&target=es2022";
+import { GrowthBook } from "@growthbook/growthbook";
 
 const GB_USER_ID_STORAGE_KEY = "gb_user_id";
 const GB_URL_CHANGE_EVENT = "growthbook:url-change";
@@ -102,31 +102,13 @@ function installGrowthBookUrlTracking() {
  */
 export const gb = new GrowthBook({
   apiHost: "https://cdn.growthbook.io",
-  clientKey: "sdk-IH47uvHMpRKPDj",
+  clientKey: "sdk-IhqsVdDTJr4rQB5s",
   enableDevMode: isDevMode,
   attributes: buildBaseAttributes(),
   // Define default features for local testing/development
   features: {
-    "show-beta-badge": {
-      defaultValue: true,
-    },
-    "header-variant": {
-      defaultValue: "standard",
-    },
-    "recipe-layout": {
-      defaultValue: "metro",
-    },
     "nav-position": {
       defaultValue: "bottom",
-    },
-    "nav-order-1": {
-      defaultValue: "restaurants",
-    },
-    "nav-order-2": {
-      defaultValue: "recipes",
-    },
-    "nav-order-3": {
-      defaultValue: "infos",
     },
     "nav-tabs-order": {
       defaultValue: "restaurants-recipes-infos",
