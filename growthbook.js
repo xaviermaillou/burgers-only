@@ -1,4 +1,5 @@
 import { GrowthBook } from "@growthbook/growthbook";
+import { autoAttributesPlugin, growthbookTrackingPlugin } from "@growthbook/growthbook-plugins";
 
 const GB_USER_ID_STORAGE_KEY = "gb_user_id";
 const GB_URL_CHANGE_EVENT = "growthbook:url-change";
@@ -17,14 +18,14 @@ function readStoredUserId() {
     if (localValue) {
       return localValue;
     }
-  } catch {}
+  } catch { }
 
   try {
     const sessionValue = window.sessionStorage.getItem(GB_USER_ID_STORAGE_KEY);
     if (sessionValue) {
       return sessionValue;
     }
-  } catch {}
+  } catch { }
 
   return null;
 }
@@ -33,11 +34,11 @@ function writeStoredUserId(userId) {
   try {
     window.localStorage.setItem(GB_USER_ID_STORAGE_KEY, userId);
     return;
-  } catch {}
+  } catch { }
 
   try {
     window.sessionStorage.setItem(GB_USER_ID_STORAGE_KEY, userId);
-  } catch {}
+  } catch { }
 }
 
 function getOrCreateUserId() {
@@ -52,16 +53,39 @@ function getOrCreateUserId() {
 }
 
 function buildBaseAttributes() {
+  const userId = getOrCreateUserId();
+  const ua = window.navigator.userAgent;
+
+  // Mapping attributes to match Managed Warehouse expectations
+  const browser = /chrome|chromium|crios/i.test(ua) ? "chrome" :
+    /firefox|fxios/i.test(ua) ? "firefox" :
+      /safari/i.test(ua) ? "safari" :
+        /edge/i.test(ua) ? "edge" : "unknown";
+
+  const os = /android/i.test(ua) ? "android" :
+    /iphone|ipad|ipod/i.test(ua) ? "ios" :
+      /windows/i.test(ua) ? "windows" :
+        /mac/i.test(ua) ? "macos" : "unknown";
+
+  const deviceType = /Mobi|Android/i.test(ua) ? "mobile" : "desktop";
+
   return {
-    id: getOrCreateUserId(),
-    url: window.location.href
+    id: userId,
+    user_id: userId,
+    device_id: userId,
+    ua_browser: browser,
+    ua_os: os,
+    ua_device_type: deviceType
   };
 }
 
-function updateGrowthBookUrlAttribute() {
+function updateGrowthBookAttributes() {
+  const current = gb.getAttributes() || {};
   gb.setAttributes({
-    ...(gb.getAttributes() || {}),
-    url: window.location.href
+    ...current,
+    url: window.location.href,
+    path: window.location.pathname,
+    host: window.location.host
   });
 }
 
@@ -93,7 +117,7 @@ function installGrowthBookUrlTracking() {
   patchHistoryMethod("replaceState");
   window.addEventListener("popstate", notifyUrlChange);
   window.addEventListener("hashchange", notifyUrlChange);
-  window.addEventListener(GB_URL_CHANGE_EVENT, updateGrowthBookUrlAttribute);
+  window.addEventListener(GB_URL_CHANGE_EVENT, updateGrowthBookAttributes);
 }
 
 /**
@@ -105,6 +129,14 @@ export const gb = new GrowthBook({
   clientKey: "sdk-IhqsVdDTJr4rQB5s",
   enableDevMode: isDevMode,
   attributes: buildBaseAttributes(),
+  plugins: [
+    autoAttributesPlugin({
+      // Pass our userId to prevent the plugin from creating its own random identifier
+      uuid: getOrCreateUserId(),
+      uuidAutoPersist: false
+    }),
+    growthbookTrackingPlugin()
+  ],
   // Define default features for local testing/development
   features: {
     "nav-position": {
@@ -115,22 +147,31 @@ export const gb = new GrowthBook({
     }
   },
   trackingCallback: (experiment, result) => {
-    // Integrate with GTM/GA4 if dataLayer exists
+    // 🕵️ Tracing Logic (as seen in SDK docs)
+    console.log("🕵️ GrowthBook Trace:", {
+      id: experiment.key,
+      variationId: result.key,
+      inExperiment: result.inExperiment,
+      hashAttribute: experiment.hashAttribute || "id",
+      hashValue: result.hashValue
+    });
+
+    // 🔗 Optional: Push to Google Tag Manager / GA4
     if (window.dataLayer && typeof window.dataLayer.push === "function") {
       window.dataLayer.push({
         event: "experiment_viewed",
         experiment_id: experiment.key,
-        variation_id: result.key
+        variation_id: String(result.key)
       });
     }
-    if (isDevMode) {
-      console.log("Experiment Viewed", {
-        experimentId: experiment.key,
-        variationId: result.key
-      });
-    }
-  },
+  }
 });
+
+// Expose GB instance globally for debugging
+if (isDevMode) {
+  window.gb = gb;
+  console.log("🛠️ GrowthBook Debug: current attributes", gb.getAttributes());
+}
 
 /**
  * Initialize GrowthBook
@@ -138,16 +179,22 @@ export const gb = new GrowthBook({
  */
 export async function initGrowthBook() {
   installGrowthBookUrlTracking();
-  updateGrowthBookUrlAttribute();
+  updateGrowthBookAttributes();
 
   if (!growthBookInitPromise) {
     growthBookInitPromise = (async () => {
       try {
         // If clientKey is missing, gb.init() will still work with local features
         await gb.init({ streaming: true });
-        updateGrowthBookUrlAttribute();
+        updateGrowthBookAttributes();
         if (isDevMode) {
           console.log("GrowthBook initialized successfully");
+          const navPosEval = gb.evalFeature("nav-position");
+          console.log("Feature 'nav-position' state:", {
+            value: navPosEval.value,
+            source: navPosEval.source,
+            experimentId: navPosEval.experiment?.key || "N/A"
+          });
         }
       } catch (err) {
         console.error("GrowthBook failed to initialize", err);
