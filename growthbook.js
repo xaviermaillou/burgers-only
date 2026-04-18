@@ -141,9 +141,6 @@ export const gb = new GrowthBook({
   features: {
     "nav-position": {
       defaultValue: "bottom",
-    },
-    "nav-tabs-order": {
-      defaultValue: "restaurants-recipes-infos",
     }
   },
   trackingCallback: (experiment, result) => {

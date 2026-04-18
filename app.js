@@ -41,7 +41,6 @@ const infoReaderBody = document.getElementById('infoReaderBody');
 let bottomTabs = null;
 let routerController = null;
 let navPositionVariant = 'bottom';
-let navTabsOrderVariant = 'restaurants-recipes-infos';
 
 function pushDataLayerEvent(eventName, payload = {}) {
   window.dataLayer = window.dataLayer || [];
@@ -49,27 +48,6 @@ function pushDataLayerEvent(eventName, payload = {}) {
     event: eventName,
     ...payload
   });
-}
-
-function normalizeNavTabsOrder(value) {
-  const normalizedValue = String(value || '').trim().toLowerCase();
-  if (
-    normalizedValue === 'recipes-restaurants-infos' ||
-    normalizedValue === 'recipes-first' ||
-    normalizedValue === 'recipes_first'
-  ) {
-    return 'recipes-restaurants-infos';
-  }
-
-  return 'restaurants-recipes-infos';
-}
-
-function getNavTabsOrderTargets(orderVariant) {
-  if (orderVariant === 'recipes-restaurants-infos') {
-    return ['recipesView', 'restaurantsView', 'infosView'];
-  }
-
-  return ['restaurantsView', 'recipesView', 'infosView'];
 }
 
 function initOrRefreshBottomTabs() {
@@ -111,57 +89,6 @@ function initOrRefreshBottomTabs() {
   if (activeViewId) {
     bottomTabs.setActive(activeViewId);
   }
-}
-
-function applyNavTabsOrder(orderValue) {
-  if (!bottomNavTrack) {
-    return;
-  }
-
-  const nextOrderVariant = normalizeNavTabsOrder(orderValue);
-  if (nextOrderVariant === navTabsOrderVariant && bottomTabs) {
-    return;
-  }
-
-  navTabsOrderVariant = nextOrderVariant;
-  const activeViewId = document.querySelector('.view.active')?.id || null;
-
-  const itemsByTarget = new Map(navItems.map((item) => [item.dataset.viewTarget, item]));
-  const viewsById = new Map(views.map((view) => [view.id, view]));
-  const orderedTargets = getNavTabsOrderTargets(navTabsOrderVariant);
-
-  orderedTargets.forEach((viewTarget) => {
-    const item = itemsByTarget.get(viewTarget);
-    if (item) {
-      bottomNavTrack.appendChild(item);
-    }
-
-    const view = viewsById.get(viewTarget);
-    if (view && viewsTrack) {
-      viewsTrack.appendChild(view);
-    }
-  });
-
-  initOrRefreshBottomTabs();
-
-  if (activeViewId && viewsTrack) {
-    const orderedViews = [...viewsTrack.querySelectorAll('.view')];
-    const activeIndex = Math.max(
-      0,
-      orderedViews.findIndex((view) => view.id === activeViewId)
-    );
-    viewsTrack.style.setProperty('--view-index', String(activeIndex));
-    if (bottomTabs) {
-      bottomTabs.setActive(activeViewId);
-    }
-  }
-
-  updateTopNavLayoutMetrics();
-}
-
-function applyNavTabsOrderFromGrowthBook() {
-  const navTabsOrderFeature = gb.getFeatureValue('nav-tabs-order', 'restaurants-recipes-infos');
-  applyNavTabsOrder(navTabsOrderFeature);
 }
 
 function normalizeNavPosition(value) {
@@ -314,7 +241,7 @@ routerController = initRouter({
   getInfoItemsById: infosController.getInfoItemsById
 });
 
-applyNavTabsOrderFromGrowthBook();
+initOrRefreshBottomTabs();
 applyNavPositionFromGrowthBook();
 
 initAuthController({
@@ -351,7 +278,6 @@ const recipesController = initRecipesController({
 });
 
 void initGrowthBook().then(() => {
-  applyNavTabsOrderFromGrowthBook();
   applyNavPositionFromGrowthBook();
 });
 routerController.applyRouteFromLocation({ replace: true });
