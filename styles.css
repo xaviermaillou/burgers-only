@@ -54,14 +54,20 @@ body.nav-top.geotag-hidden .app-shell {
 
 .views-viewport {
   overflow: hidden;
+  margin-left: -20px;
+  margin-right: -20px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .views-track {
   --view-index: 0;
+  --view-gap: 20px;
   display: flex;
   align-items: flex-start;
+  gap: var(--view-gap);
   width: 100%;
-  transform: translate3d(calc(var(--view-index) * -100%), 0, 0);
+  transform: translate3d(calc(var(--view-index) * (-100% - var(--view-gap))), 0, 0);
   transition: transform 340ms cubic-bezier(0.15, 0.7, 0.2, 1);
   will-change: transform;
 }
@@ -72,7 +78,7 @@ body.nav-top.geotag-hidden .app-shell {
   padding-top: 12px;
   padding-right: 8px;
   padding-bottom: 8px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 button,
