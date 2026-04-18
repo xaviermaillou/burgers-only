@@ -41,6 +41,7 @@ const infoReaderBody = document.getElementById('infoReaderBody');
 let bottomTabs = null;
 let routerController = null;
 let navPositionVariant = 'bottom';
+let topNavInitialized = false;
 
 function pushDataLayerEvent(eventName, payload = {}) {
   window.dataLayer = window.dataLayer || [];
@@ -48,6 +49,16 @@ function pushDataLayerEvent(eventName, payload = {}) {
     event: eventName,
     ...payload
   });
+
+  if (gb && typeof gb.logEvent === 'function') {
+    const attrs = gb.getAttributes() || {};
+    gb.logEvent(eventName, {
+      ...payload,
+      id: attrs.id,
+      user_id: attrs.user_id,
+      device_id: attrs.device_id
+    });
+  }
 }
 
 function initOrRefreshBottomTabs() {
@@ -119,6 +130,7 @@ function applyNavPosition(position) {
   document.body.classList.toggle('nav-top', isTopNav);
 
   if (!isTopNav) {
+    document.body.classList.remove('nav-top-initializing');
     document.documentElement.style.removeProperty('--geotag-height');
     document.documentElement.style.removeProperty('--nav-top-padding');
     document.documentElement.style.removeProperty('--nav-top-offset');
@@ -129,9 +141,21 @@ function applyNavPosition(position) {
     return;
   }
 
+  const shouldDisableInitialTransition = !topNavInitialized;
+  if (shouldDisableInitialTransition) {
+    document.body.classList.add('nav-top-initializing');
+  }
+
   window.requestAnimationFrame(() => {
     updateTopNavLayoutMetrics();
     updateActiveViewHeight();
+
+    if (shouldDisableInitialTransition) {
+      window.requestAnimationFrame(() => {
+        document.body.classList.remove('nav-top-initializing');
+        topNavInitialized = true;
+      });
+    }
   });
 }
 
