@@ -145,8 +145,9 @@
       ]);
       const isProductionHost = productionHosts.has(window.location.hostname);
       const script = document.createElement("script");
+      const cacheBuster = Date.now();
 
-      script.src = isProductionHost ? "build/app.js" : "app.js";
+      script.src = isProductionHost ? `build/app.js?v=${cacheBuster}` : `app.js?v=${cacheBuster}`;
       script.type = "module";
 
       document.body.appendChild(script);
