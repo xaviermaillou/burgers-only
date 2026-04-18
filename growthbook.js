@@ -1,5 +1,5 @@
 import { GrowthBook } from "@growthbook/growthbook";
-import { autoAttributesPlugin, growthbookTrackingPlugin } from "@growthbook/growthbook-plugins";
+import { autoAttributesPlugin, growthbookTrackingPlugin } from "@growthbook/growthbook/plugins";
 
 const GB_USER_ID_STORAGE_KEY = "gb_user_id";
 const GB_URL_CHANGE_EVENT = "growthbook:url-change";
