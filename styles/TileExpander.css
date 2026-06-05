@@ -61,10 +61,11 @@ body.tile-open .menu-btn {
 }
 
 .tile-expander-image-base {
+  --blur-bleed: 16px;
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: calc(var(--blur-bleed) * -1);
+  width: calc(100% + var(--blur-bleed) * 2);
+  height: calc(100% + var(--blur-bleed) * 2);
   object-fit: cover;
   pointer-events: none;
   z-index: 0;
@@ -132,7 +133,9 @@ body.tile-open .menu-btn {
   padding: 12px;
   position: relative;
   z-index: 3;
+  opacity: 0;
   transition: opacity 120ms ease;
+  transition-delay: 0ms;
 }
 
 .tile-expander-bottom {
@@ -143,8 +146,14 @@ body.tile-open .menu-btn {
   z-index: 3;
 }
 
+.tile-overlay.expanded .tile-expander-top {
+  opacity: 1;
+  transition-delay: 360ms;
+}
+
 .tile-expander.is-collapsing .tile-expander-top {
   opacity: 0;
+  transition-delay: 0ms;
 }
 
 .tile-expander .tile-title {

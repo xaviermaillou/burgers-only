@@ -89,11 +89,13 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     activeTileElement = tileElement;
 
     const fromRect = tileElement.getBoundingClientRect();
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
     const toRect = {
       top: inset,
       left: inset,
-      width: Math.max(0, window.innerWidth - inset * 2),
-      height: Math.max(0, window.innerHeight - inset * 2)
+      width: Math.max(0, viewportWidth - inset * 2),
+      height: Math.max(0, viewportHeight - inset * 2)
     };
 
     expander.className = `${tileElement.className} tile-expander`;
