@@ -74,7 +74,8 @@ export function initBottomTabs({ bottomNav, bottomNavTrack, items, onSelect }) {
   };
 
   const listeners = tabs.map((item) => {
-    const handler = () => {
+    const handler = (event) => {
+      event.preventDefault();
       if (typeof onSelect === 'function') {
         onSelect(item.dataset.viewTarget);
       }

@@ -146,7 +146,8 @@ export function initRouter({
   infoReader,
   restaurantList,
   recipeList,
-  getInfoItemsById
+  getInfoItemsById,
+  onTitleUpdate = null
 }) {
   if (
     typeof switchView !== 'function' ||
@@ -175,6 +176,38 @@ export function initRouter({
   let recipesLoaded = false;
   let suppressTileCloseRouteSync = false;
   let suppressInfoCloseRouteSync = false;
+
+  function readTileTitle(target, routeId) {
+    return findTileByRouteId(target, routeId)?.querySelector('.tile-title')?.textContent?.trim() || '';
+  }
+
+  function resolveRouteItemTitle(nextRouteState) {
+    const item = nextRouteState?.item;
+    if (!item) {
+      return '';
+    }
+
+    if (item.type === 'restaurant') {
+      return readTileTitle(restaurantList, item.id);
+    }
+
+    if (item.type === 'recipe') {
+      return readTileTitle(recipeList, item.id);
+    }
+
+    if (item.type === 'info') {
+      const infoItemsById = typeof getInfoItemsById === 'function' ? getInfoItemsById() : null;
+      return infoItemsById instanceof Map ? infoItemsById.get(item.id)?.title || '' : '';
+    }
+
+    return '';
+  }
+
+  function updateDocumentTitle(nextRouteState = routeState, itemTitle = resolveRouteItemTitle(nextRouteState)) {
+    if (typeof onTitleUpdate === 'function') {
+      onTitleUpdate(nextRouteState, itemTitle);
+    }
+  }
 
   function writeRouteToHistory(nextRouteState, { replace = false } = {}) {
     const nextUrl = buildRouteUrl(nextRouteState);
@@ -209,6 +242,7 @@ export function initRouter({
     });
 
     setRouteState(nextRouteState, { replace });
+    updateDocumentTitle(normalizeRouteState(nextRouteState));
   }
 
   function tryOpenPendingRouteItem() {
@@ -230,6 +264,7 @@ export function initRouter({
       }
 
       infoReader.open(infoItem);
+      updateDocumentTitle(routeState, infoItem.title || '');
       pendingRouteItem = null;
       return;
     }
@@ -251,6 +286,7 @@ export function initRouter({
         }
 
         tileExpander.open(tileElement);
+        updateDocumentTitle(routeState, readTileTitle(restaurantList, id));
         pendingRouteItem = null;
       };
 
@@ -273,6 +309,7 @@ export function initRouter({
       }
 
       tileExpander.open(tileElement);
+      updateDocumentTitle(routeState, readTileTitle(restaurantList, id));
       pendingRouteItem = null;
       return;
     }
@@ -294,6 +331,7 @@ export function initRouter({
         }
 
         tileExpander.open(tileElement);
+        updateDocumentTitle(routeState, readTileTitle(recipeList, id));
         pendingRouteItem = null;
       };
 
@@ -316,6 +354,7 @@ export function initRouter({
       }
 
       tileExpander.open(tileElement);
+      updateDocumentTitle(routeState, readTileTitle(recipeList, id));
       pendingRouteItem = null;
       return;
     }
@@ -326,6 +365,7 @@ export function initRouter({
   function applyRouteState(nextRouteState, { replace = false } = {}) {
     const normalized = setRouteState(nextRouteState, { replace });
     switchView(ROUTE_TAB_TO_VIEW[normalized.tab]);
+    updateDocumentTitle(normalized);
 
     const wantsInfoOpen = normalized.item?.type === 'info';
     const wantsTileOpen =

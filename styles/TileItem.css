@@ -11,6 +11,7 @@
   overflow: hidden;
   position: relative;
   z-index: 20;
+  text-decoration: none;
 }
 
 .tile-1x1 {

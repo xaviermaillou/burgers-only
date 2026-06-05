@@ -156,7 +156,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     }
 
     if (titleText) {
-      const title = document.createElement('p');
+      const title = document.createElement('h3');
       title.className = 'tile-title';
       title.textContent = titleText;
       bottom.appendChild(title);

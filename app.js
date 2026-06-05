@@ -43,6 +43,19 @@ let routerController = null;
 let navPositionVariant = 'bottom';
 let topNavInitialized = false;
 
+const PAGE_TITLE_BASE = 'BurgersOnly';
+const PAGE_TITLE_TAB_LABELS = {
+  restaurants: 'Restaurants',
+  recipes: 'Recettes',
+  infos: 'Infos'
+};
+
+function updatePageTitle(routeState, itemTitle = '') {
+  const tabLabel = PAGE_TITLE_TAB_LABELS[routeState?.tab] || PAGE_TITLE_TAB_LABELS.restaurants;
+  const cleanItemTitle = String(itemTitle || '').trim();
+  document.title = `${PAGE_TITLE_BASE} | ${cleanItemTitle || tabLabel}`;
+}
+
 function pushDataLayerEvent(eventName, payload = {}) {
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
@@ -262,7 +275,8 @@ routerController = initRouter({
   infoReader,
   restaurantList,
   recipeList,
-  getInfoItemsById: infosController.getInfoItemsById
+  getInfoItemsById: infosController.getInfoItemsById,
+  onTitleUpdate: updatePageTitle
 });
 
 initOrRefreshBottomTabs();

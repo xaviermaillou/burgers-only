@@ -80,8 +80,26 @@ function resolveAssetUrl(path) {
   }
 }
 
+function buildTileHref(item, variant) {
+  const routeId = String(item.routeId || '').trim();
+  if (!routeId) {
+    return window.location.pathname;
+  }
+
+  const type = variant === 'restaurant' ? 'restaurant' : 'recipe';
+  const tab = variant === 'restaurant' ? 'restaurants' : 'recipes';
+  const url = new URL(window.location.href);
+
+  ['tab', 'restaurant', 'recipe', 'info'].forEach((key) => url.searchParams.delete(key));
+  url.searchParams.set('tab', tab);
+  url.searchParams.set(type, routeId);
+
+  const query = url.searchParams.toString();
+  return `${url.pathname}${query ? `?${query}` : ''}${url.hash}`;
+}
+
 export function createTileItem(item, variant, onOpen) {
-  const tile = document.createElement('article');
+  const tile = document.createElement('a');
   const variantClass = variant === 'restaurant' ? 'restaurant-tile' : 'recipe-tile';
   const kickerMarkup = item.meta ? `<p class="tile-kicker">${item.meta}</p>` : '';
   const imageUrl = resolveImageUrl(item);
@@ -93,10 +111,12 @@ export function createTileItem(item, variant, onOpen) {
     : '';
 
   tile.className = `tile ${variantClass} ${item.size} ${hasImageClass}`;
+  tile.href = buildTileHref(item, variant);
+  tile.tabIndex = -1;
   tile.innerHTML = `
     ${imageMarkup}
     ${kickerMarkup}
-    <p class="tile-title">${item.name}</p>
+    <h3 class="tile-title">${item.name}</h3>
   `;
   tile.dataset.expandedBody = item.expandedBody || '';
   tile.dataset.expandedList = JSON.stringify(item.expandedList || []);
@@ -122,7 +142,10 @@ export function createTileItem(item, variant, onOpen) {
   }
 
   if (typeof onOpen === 'function') {
-    tile.addEventListener('click', () => onOpen(tile, item));
+    tile.addEventListener('click', (event) => {
+      event.preventDefault();
+      onOpen(tile, item);
+    });
   }
 
   return tile;
