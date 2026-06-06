@@ -174,7 +174,8 @@ function applyNavPosition(position) {
 
 function applyNavPositionFromGrowthBook() {
   const navPositionFeature = gb.getFeatureValue('nav-position', 'bottom');
-  applyNavPosition(navPositionFeature);
+  // applyNavPosition(navPositionFeature);
+  applyNavPosition('bottom');
 }
 
 function updateViewportHeight(activeView) {
