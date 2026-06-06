@@ -5,5 +5,5 @@ export async function resolveItemImage(collection, id) {
     return '';
   }
 
-  return `/images/items/${collectionName}/${itemId}.jpg`;
+  return `/images/items/${collectionName}/${itemId}.webp`;
 }
