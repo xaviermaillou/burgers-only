@@ -114,26 +114,22 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     const maskUrl = tileElement.dataset.maskUrl || '';
 
     if (imageUrl) {
-      const baseImage = document.createElement('img');
-      baseImage.src = imageUrl;
-      baseImage.alt = '';
-      baseImage.className = 'tile-expander-image-base';
-
-      content.appendChild(baseImage);
-
+      const media = document.createElement('div');
+      media.className = 'tile-expander-media';
       if (maskUrl) {
         content.style.setProperty('--tile-mask-url', `url("${maskUrl}")`);
-
-        const maskedImage = document.createElement('img');
-        maskedImage.src = imageUrl;
-        maskedImage.alt = '';
-        maskedImage.className = 'tile-expander-image-mask';
-        content.appendChild(maskedImage);
       }
+
+      const image = document.createElement('img');
+      image.src = imageUrl;
+      image.alt = '';
+      image.className = 'tile-expander-image';
+      media.appendChild(image);
 
       const veilLayer = document.createElement('div');
       veilLayer.className = 'tile-expander-veil';
-      content.appendChild(veilLayer);
+      media.appendChild(veilLayer);
+      content.appendChild(media);
     }
 
     const top = document.createElement('div');
