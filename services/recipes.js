@@ -2,7 +2,6 @@ import {
   getDoc,
   getDocs,
   collection,
-  onSnapshot,
   orderBy,
   query
 } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js';
@@ -42,7 +41,7 @@ async function normalizeRecipe(doc, index) {
   const data = doc.data();
   const ingredientRefs = Array.isArray(data.ingredients) ? data.ingredients : [];
   const ingredients = await Promise.all(ingredientRefs.map(resolveIngredient));
-  const manifestImage = await resolveItemImage(COLLECTION_NAME, doc.id);
+  const manifestImage = resolveItemImage(COLLECTION_NAME, doc.id);
 
   return {
     id: doc.id,
@@ -61,31 +60,6 @@ function recipesQuery() {
 export async function fetchRecipes() {
   const snapshot = await getDocs(recipesQuery());
   return Promise.all(snapshot.docs.map((doc, index) => normalizeRecipe(doc, index)));
-}
-
-export function subscribeRecipes(onUpdate, onError) {
-  return onSnapshot(
-    recipesQuery(),
-    async (snapshot) => {
-      try {
-        const recipes = await Promise.all(
-          snapshot.docs.map((doc, index) => normalizeRecipe(doc, index))
-        );
-        if (typeof onUpdate === 'function') {
-          onUpdate(recipes);
-        }
-      } catch (error) {
-        if (typeof onError === 'function') {
-          onError(error);
-        }
-      }
-    },
-    (error) => {
-      if (typeof onError === 'function') {
-        onError(error);
-      }
-    }
-  );
 }
 
 export { COLLECTION_NAME as RECIPES_COLLECTION };

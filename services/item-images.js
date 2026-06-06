@@ -1,4 +1,4 @@
-export async function resolveItemImage(collection, id) {
+export function resolveItemImage(collection, id) {
   const collectionName = String(collection || '').trim();
   const itemId = String(id || '').trim();
   if (!collectionName || !itemId) {

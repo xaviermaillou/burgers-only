@@ -12,7 +12,8 @@ import { initRecipesController } from './features/recipes-controller.js';
 import { initInfosController } from './features/infos-controller.js';
 
 const views = [...document.querySelectorAll('.view')];
-let navItems = [...document.querySelectorAll('.nav-item')];
+const viewIndexById = new Map(views.map((view, index) => [view.id, index]));
+const navItems = [...document.querySelectorAll('.nav-item')];
 const bottomNav = document.querySelector('.bottom-nav');
 const bottomNavTrack = document.querySelector('.bottom-nav-track');
 const viewsViewport = document.querySelector('.views-viewport');
@@ -74,17 +75,11 @@ function pushDataLayerEvent(eventName, payload = {}) {
   }
 }
 
-function initOrRefreshBottomTabs() {
+function initBottomNavigation() {
   if (!bottomNav || !bottomNavTrack) {
     return;
   }
 
-  if (bottomTabs) {
-    bottomTabs.destroy();
-    bottomTabs = null;
-  }
-
-  navItems = [...bottomNavTrack.querySelectorAll('.nav-item')];
   bottomTabs = initBottomTabs({
     bottomNav,
     bottomNavTrack,
@@ -178,38 +173,29 @@ function applyNavPositionFromGrowthBook() {
   applyNavPosition('bottom');
 }
 
-function updateViewportHeight(activeView) {
+function updateViewportHeight(activeView = document.querySelector('.view.active')) {
   if (!viewsViewport || !activeView) {
     return;
   }
 
-  const nextHeight = Math.max(activeView.scrollHeight, activeView.offsetHeight);
-  viewsViewport.style.height = `${nextHeight}px`;
+  viewsViewport.style.height = `${Math.max(activeView.scrollHeight, activeView.offsetHeight)}px`;
 }
 
 function updateActiveViewHeight() {
-  const activeView = document.querySelector('.view.active');
-  if (!activeView) {
-    return;
-  }
-
-  updateViewportHeight(activeView);
+  updateViewportHeight();
 }
 
 function switchView(viewId) {
-  const orderedViews = viewsTrack ? [...viewsTrack.querySelectorAll('.view')] : views;
-  const nextActiveIndex = orderedViews.findIndex((view) => view.id === viewId);
-  const activeIndex = nextActiveIndex >= 0 ? nextActiveIndex : 0;
-  let activeView = orderedViews[activeIndex] || views[0] || null;
+  const activeIndex = viewIndexById.get(viewId) ?? 0;
+  const activeView = views[activeIndex] || views[0] || null;
+  const nextViewportHeight = activeView
+    ? Math.max(activeView.scrollHeight, activeView.offsetHeight)
+    : 0;
 
   views.forEach((view) => {
     const isTarget = view.id === viewId;
     view.classList.toggle('active', isTarget);
     view.setAttribute('aria-hidden', String(!isTarget));
-
-    if (isTarget) {
-      activeView = view;
-    }
   });
 
   if (viewsTrack) {
@@ -220,7 +206,9 @@ function switchView(viewId) {
     bottomTabs.setActive(viewId);
   }
 
-  updateViewportHeight(activeView);
+  if (viewsViewport && nextViewportHeight) {
+    viewsViewport.style.height = `${nextViewportHeight}px`;
+  }
   window.scrollTo(0, 0);
 }
 
@@ -280,7 +268,7 @@ routerController = initRouter({
   onTitleUpdate: updatePageTitle
 });
 
-initOrRefreshBottomTabs();
+initBottomNavigation();
 applyNavPositionFromGrowthBook();
 
 initAuthController({

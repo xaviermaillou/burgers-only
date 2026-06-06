@@ -13,7 +13,6 @@ const MASK_CONFIG = {
   }
 };
 const TEST_FALLBACK_IMAGE = 'data/test-assets/mock-burger-mask-test.svg';
-let imageLoadDelayMs = 0;
 
 function normalizeMaskKind(value) {
   return value === MASK_KIND_WIDE ? MASK_KIND_WIDE : MASK_KIND_SQUARE;
@@ -107,7 +106,7 @@ export function createTileItem(item, variant, onOpen) {
   const mask = imageUrl ? resolveMask(item, variant) : null;
   const maskName = mask ? mask.filename : '';
   const imageMarkup = imageUrl
-    ? `<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="${imageUrl}" alt="" class="tile-bg-image" />`
+    ? `<img src="${imageUrl}" alt="" class="tile-bg-image" loading="lazy" decoding="async" />`
     : '';
 
   tile.className = `tile ${variantClass} ${item.size} ${hasImageClass}`;
@@ -128,17 +127,6 @@ export function createTileItem(item, variant, onOpen) {
     const maskUrl = resolveAssetUrl(`data/masks/${maskName}`);
     tile.dataset.maskUrl = maskUrl;
     tile.style.setProperty('--tile-mask-url', `url("${maskUrl}")`);
-
-    // Delay image assignment so many tiles do not request at the exact same time.
-    imageLoadDelayMs += 120;
-    window.setTimeout(() => {
-      const images = tile.querySelectorAll('.tile-bg-image');
-      images.forEach((img) => {
-        if (img.dataset.src) {
-          img.src = img.dataset.src;
-        }
-      });
-    }, imageLoadDelayMs);
   }
 
   if (typeof onOpen === 'function') {

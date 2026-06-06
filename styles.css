@@ -84,6 +84,7 @@ body.nav-top.nav-top-initializing .bottom-nav {
 .view {
   flex: 0 0 100%;
   min-width: 0;
+  contain: layout paint;
   padding-top: 12px;
   padding-right: 8px;
   padding-bottom: 8px;
