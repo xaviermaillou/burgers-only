@@ -142,7 +142,10 @@ body.tile-open .menu-btn {
   display: grid;
   align-content: end;
   padding: 12px;
-  position: relative;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 3;
 }
 
