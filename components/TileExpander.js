@@ -89,12 +89,15 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     activeTileElement = tileElement;
 
     const fromRect = tileElement.getBoundingClientRect();
+    document.body.classList.add('tile-open');
+    document.documentElement.getBoundingClientRect();
+
     const viewportWidth = document.documentElement.clientWidth;
     const viewportHeight = document.documentElement.clientHeight;
     const toRect = {
       top: inset,
       left: inset,
-      width: Math.max(0, viewportWidth - inset * 2),
+      width: Math.max(0, viewportWidth - inset * 2 - 3),
       height: Math.max(0, viewportHeight - inset * 2)
     };
 
@@ -175,7 +178,6 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
       overlay.classList.add('has-image-open');
     }
     overlay.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('tile-open');
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
