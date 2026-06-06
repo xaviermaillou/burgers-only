@@ -30,6 +30,10 @@ body.tile-open .menu-btn {
   transition: opacity 220ms ease, visibility 0s linear 0s;
 }
 
+.tile-overlay.behind-nav {
+  z-index: 70;
+}
+
 .tile-expander {
   position: fixed;
   margin: 0;

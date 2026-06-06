@@ -12,6 +12,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
   let activeTileElement = null;
   let isAnimating = false;
   let cleanupRunId = 0;
+  let stackingTimer = null;
 
   const readExpandedList = (tileElement) => {
     try {
@@ -26,7 +27,9 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     expander.style.top = `${rect.top}px`;
     expander.style.left = `${rect.left}px`;
     expander.style.width = `${rect.width}px`;
-    expander.style.height = `${rect.height}px`;
+    expander.style.height = typeof rect.height === 'string'
+      ? rect.height
+      : `${rect.height}px`;
   };
 
   const waitAnimationEnd = (callback) => {
@@ -87,18 +90,19 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     cleanupRunId += 1;
     isAnimating = true;
     activeTileElement = tileElement;
+    window.clearTimeout(stackingTimer);
+    overlay.classList.remove('behind-nav');
 
     const fromRect = tileElement.getBoundingClientRect();
     document.body.classList.add('tile-open');
     document.documentElement.getBoundingClientRect();
 
     const viewportWidth = document.documentElement.clientWidth;
-    const viewportHeight = document.documentElement.clientHeight;
     const toRect = {
       top: inset,
       left: inset,
       width: Math.max(0, viewportWidth - inset * 2 - 3),
-      height: Math.max(0, viewportHeight - inset * 2)
+      height: `calc(100dvh - ${inset * 2}px)`
     };
 
     expander.className = `${tileElement.className} tile-expander`;
@@ -202,6 +206,9 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     expander.classList.add('is-collapsing');
     overlay.classList.remove('expanded');
     setFrame(toRect);
+    stackingTimer = window.setTimeout(() => {
+      overlay.classList.add('behind-nav');
+    }, 180);
 
     waitAnimationEnd(() => {
       expander.classList.remove('is-collapsing');
@@ -220,6 +227,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
         }
 
         expander.innerHTML = '';
+        overlay.classList.remove('behind-nav');
       });
     });
   };
@@ -250,6 +258,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
       return false;
     },
     destroy() {
+      window.clearTimeout(stackingTimer);
       overlay.removeEventListener('click', onOverlayClick);
       if (closeButton) {
         closeButton.removeEventListener('click', onCloseClick);

@@ -1,5 +1,35 @@
 export function initBottomTabs({ bottomNav, bottomNavTrack, items, onSelect }) {
   const tabs = Array.isArray(items) ? items : [];
+  let scrollAnimationFrame = null;
+
+  const animateScroll = (target) => {
+    window.cancelAnimationFrame(scrollAnimationFrame);
+
+    const start = bottomNav.scrollLeft;
+    const distance = target - start;
+    const startedAt = performance.now();
+
+    if (Math.abs(distance) < 1) {
+      bottomNav.scrollLeft = target;
+      return;
+    }
+
+    const update = (now) => {
+      const progress = Math.min(1, (now - startedAt) / 400);
+      const eased = progress < 0.5
+        ? 4 * progress ** 3
+        : 1 - (-2 * progress + 2) ** 3 / 2;
+      bottomNav.scrollLeft = progress < 1 ? start + distance * eased : target;
+
+      if (progress < 1) {
+        scrollAnimationFrame = window.requestAnimationFrame(update);
+      } else {
+        scrollAnimationFrame = null;
+      }
+    };
+
+    scrollAnimationFrame = window.requestAnimationFrame(update);
+  };
 
   const updateScrollPosition = (activeIndex) => {
     if (!bottomNav || !tabs.length) {
@@ -13,10 +43,7 @@ export function initBottomTabs({ bottomNav, bottomNavTrack, items, onSelect }) {
     const ratio = Math.max(0, Math.min(1, activeIndex / denominator));
     const target = safeMax * ratio;
 
-    bottomNav.scrollTo({
-      left: target,
-      behavior: 'smooth'
-    });
+    animateScroll(target);
   };
 
   const setActive = (viewId) => {
@@ -52,6 +79,7 @@ export function initBottomTabs({ bottomNav, bottomNavTrack, items, onSelect }) {
   return {
     setActive,
     destroy() {
+      window.cancelAnimationFrame(scrollAnimationFrame);
       listeners.forEach(({ item, handler }) => item.removeEventListener('click', handler));
     }
   };
