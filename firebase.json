@@ -4,7 +4,20 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "styles.css",
+      "styles/**"
+    ],
+    "headers": [
+      {
+        "source": "**/*.webp",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=2592000"
+          }
+        ]
+      }
     ],
     "rewrites": [
       {

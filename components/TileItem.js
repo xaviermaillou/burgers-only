@@ -97,7 +97,7 @@ function buildTileHref(item, variant) {
   return `${url.pathname}${query ? `?${query}` : ''}${url.hash}`;
 }
 
-export function createTileItem(item, variant, onOpen) {
+export function createTileItem(item, variant, onOpen, index = 0) {
   const tile = document.createElement('a');
   const variantClass = variant === 'restaurant' ? 'restaurant-tile' : 'recipe-tile';
   const kickerMarkup = item.meta ? `<p class="tile-kicker">${item.meta}</p>` : '';
@@ -105,8 +105,9 @@ export function createTileItem(item, variant, onOpen) {
   const hasImageClass = imageUrl ? 'has-image' : '';
   const mask = imageUrl ? resolveMask(item, variant) : null;
   const maskName = mask ? mask.filename : '';
+  const imageLoading = index < 4 ? 'eager' : 'lazy';
   const imageMarkup = imageUrl
-    ? `<img src="${imageUrl}" alt="" class="tile-bg-image" loading="lazy" decoding="async" />`
+    ? `<img src="${imageUrl}" alt="" class="tile-bg-image" loading="${imageLoading}" decoding="async" />`
     : '';
 
   tile.className = `tile ${variantClass} ${item.size} ${hasImageClass}`;

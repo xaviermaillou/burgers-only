@@ -6,7 +6,7 @@ export function renderTileCollection({ items, target, variant, onTileOpen }) {
   }
 
   target.innerHTML = '';
-  items.forEach((item) => {
-    target.appendChild(createTileItem(item, variant, onTileOpen));
+  items.forEach((item, index) => {
+    target.appendChild(createTileItem(item, variant, onTileOpen, index));
   });
 }
