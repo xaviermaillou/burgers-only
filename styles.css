@@ -185,7 +185,7 @@ button,
   }
 
   .tile-overlay.expanded .tile-expander-veil {
-    background-color: rgba(8, 11, 15, 0.58);
+    background-color: rgba(8, 11, 15, 0.5);
   }
 
   .tile-close-btn {

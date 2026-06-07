@@ -28,6 +28,18 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     return text ? `${text.charAt(0).toLocaleUpperCase()}${text.slice(1)}` : '';
   };
 
+  const bindBannerFade = (scrollElement, contentElement) => {
+    const update = () => {
+      const bannerProgress = Math.min(1, scrollElement.scrollTop / 35);
+      const titleProgress = Math.min(1, scrollElement.scrollTop / 140);
+      contentElement.style.setProperty('--tile-banner-opacity', String(1 - bannerProgress));
+      contentElement.style.setProperty('--tile-title-opacity', String(1 - titleProgress));
+    };
+
+    scrollElement.addEventListener('scroll', update, { passive: true });
+    update();
+  };
+
   const setFrame = (rect) => {
     expander.style.top = `${rect.top}px`;
     expander.style.left = `${rect.left}px`;
@@ -197,6 +209,9 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     content.appendChild(top);
     content.appendChild(bottom);
     expander.replaceChildren(content);
+    if (imageUrl) {
+      bindBannerFade(top, content);
+    }
     expander.style.transition = 'none';
     setFrame(fromRect);
     expander.getBoundingClientRect();

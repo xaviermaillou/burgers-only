@@ -39,7 +39,7 @@ body.tile-open .menu-btn {
   margin: 0;
   padding: 0;
   z-index: 1;
-  overflow: auto;
+  overflow: hidden;
   transition:
     top 360ms cubic-bezier(0.15, 0.7, 0.2, 1),
     left 360ms cubic-bezier(0.15, 0.7, 0.2, 1),
@@ -57,8 +57,11 @@ body.tile-open .menu-btn {
 .tile-expander-content {
   --tile-mask-url: none;
   --tile-banner-height: clamp(180px, 32dvh, 300px);
+  --tile-banner-opacity: 1;
+  --tile-title-opacity: 1;
   position: relative;
   overflow: hidden;
+  height: 100%;
   min-height: 100%;
   display: flex;
   flex-direction: column;
@@ -73,6 +76,7 @@ body.tile-open .menu-btn {
   height: 100%;
   z-index: 0;
   overflow: hidden;
+  opacity: var(--tile-banner-opacity);
   transition: height 360ms cubic-bezier(0.15, 0.7, 0.2, 1);
 }
 
@@ -115,18 +119,30 @@ body.tile-open .menu-btn {
 }
 
 .tile-overlay.expanded .tile-expander-veil {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.48);
 }
 
 .tile-expander-top {
   display: grid;
   align-content: start;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
   padding: 12px;
+  padding-bottom: 72px;
   position: relative;
   z-index: 3;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
   opacity: 0;
   transition: opacity 120ms ease;
   transition-delay: 0ms;
+}
+
+.tile-expander-top::-webkit-scrollbar {
+  display: none;
 }
 
 .tile-expander-bottom {
@@ -138,6 +154,13 @@ body.tile-open .menu-btn {
   bottom: 0;
   left: 0;
   z-index: 3;
+}
+
+.tile-overlay.expanded.has-image-open .tile-expander-bottom {
+  top: 0;
+  bottom: auto;
+  height: var(--tile-banner-height);
+  opacity: var(--tile-title-opacity);
 }
 
 .tile-overlay.expanded .tile-expander-top {
