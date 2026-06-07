@@ -90,12 +90,17 @@ function buildImageSrcSet(imageUrl, originalWidth) {
   }
 
   const baseUrl = imageUrl.slice(0, extensionIndex);
-  return [
-    `${baseUrl}-200.webp 200w`,
-    `${baseUrl}-400.webp 400w`,
-    `${baseUrl}-600.webp 600w`,
-    `${imageUrl} ${originalWidth}w`
-  ].join(', ');
+  const candidates = [
+    { url: `${baseUrl}-300.webp`, width: 300 },
+    { url: `${baseUrl}-600.webp`, width: 600 },
+    { url: `${baseUrl}-900.webp`, width: 900 },
+    { url: imageUrl, width: originalWidth }
+  ];
+
+  return candidates
+    .sort((left, right) => left.width - right.width)
+    .map(({ url, width }) => `${url} ${width}w`)
+    .join(', ');
 }
 
 function getTileImageSizes(size) {
