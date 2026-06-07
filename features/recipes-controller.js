@@ -61,6 +61,7 @@ export function initRecipesController({
         expandedList: recipe.ingredients.map((ingredient) => ingredient.name).filter(Boolean),
         expandedSteps: recipe.steps,
         image: recipe.image || '',
+        imageWidth: recipe.imageWidth,
         maskKind: useWideMask ? 'wide' : 'square',
         maskIndex: useWideMask
           ? (index % WIDE_MASK_COUNT) + 1

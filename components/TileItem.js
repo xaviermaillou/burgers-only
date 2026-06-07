@@ -79,6 +79,34 @@ function resolveAssetUrl(path) {
   }
 }
 
+function buildImageSrcSet(imageUrl, originalWidth) {
+  if (!imageUrl || !originalWidth) {
+    return '';
+  }
+
+  const extensionIndex = imageUrl.lastIndexOf('.webp');
+  if (extensionIndex === -1) {
+    return '';
+  }
+
+  const baseUrl = imageUrl.slice(0, extensionIndex);
+  return [
+    `${baseUrl}-200.webp 200w`,
+    `${baseUrl}-400.webp 400w`,
+    `${baseUrl}-600.webp 600w`,
+    `${imageUrl} ${originalWidth}w`
+  ].join(', ');
+}
+
+function getTileImageSizes(size) {
+  const spansTwoColumns = size === 'tile-2x1' || size === 'tile-2x2';
+  if (spansTwoColumns) {
+    return '(min-width: 1200px) 40vw, (min-width: 900px) 50vw, (min-width: 600px) 67vw, 100vw';
+  }
+
+  return '(min-width: 1200px) 20vw, (min-width: 900px) 25vw, (min-width: 600px) 33vw, 50vw';
+}
+
 function buildTileHref(item, variant) {
   const routeId = String(item.routeId || '').trim();
   if (!routeId) {
@@ -107,8 +135,13 @@ export function createTileItem(item, variant, onOpen, imagePriority = {}) {
   const maskName = mask ? mask.filename : '';
   const imageLoading = imagePriority.eager ? 'eager' : 'lazy';
   const fetchPriority = imagePriority.highPriority ? 'high' : 'auto';
+  const imageSrcSet = buildImageSrcSet(imageUrl, item.imageWidth);
+  const imageSizes = getTileImageSizes(item.size);
+  const responsiveAttributes = imageSrcSet
+    ? ` srcset="${imageSrcSet}" sizes="${imageSizes}"`
+    : '';
   const imageMarkup = imageUrl
-    ? `<img src="${imageUrl}" alt="" class="tile-bg-image" loading="${imageLoading}" fetchpriority="${fetchPriority}" decoding="async" />`
+    ? `<img src="${imageUrl}"${responsiveAttributes} alt="" class="tile-bg-image" loading="${imageLoading}" fetchpriority="${fetchPriority}" decoding="async" />`
     : '';
 
   tile.className = `tile ${variantClass} ${item.size} ${hasImageClass}`;
@@ -127,6 +160,7 @@ export function createTileItem(item, variant, onOpen, imagePriority = {}) {
   }
   if (imageUrl) {
     tile.dataset.image = imageUrl;
+    tile.dataset.imageSrcset = imageSrcSet;
     const maskUrl = resolveAssetUrl(`data/masks/${maskName}`);
     tile.dataset.maskUrl = maskUrl;
     tile.style.setProperty('--tile-mask-url', `url("${maskUrl}")`);

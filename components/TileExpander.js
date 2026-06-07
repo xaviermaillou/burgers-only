@@ -140,6 +140,10 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
 
       const image = document.createElement('img');
       image.src = imageUrl;
+      if (tileElement.dataset.imageSrcset) {
+        image.srcset = tileElement.dataset.imageSrcset;
+        image.sizes = `calc(100vw - ${inset * 2}px)`;
+      }
       image.alt = '';
       image.className = 'tile-expander-image';
       media.appendChild(image);

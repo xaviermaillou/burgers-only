@@ -168,6 +168,7 @@ export function initRestaurantsController({
         name: restaurant.name,
         meta: restaurant.area,
         image: restaurant.image || '',
+        imageWidth: restaurant.imageWidth,
         maskIndex: useWideMask
           ? (index % WIDE_MASK_COUNT) + 1
           : (index % SQUARE_MASK_COUNT) + 1,

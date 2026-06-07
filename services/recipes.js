@@ -6,7 +6,7 @@ import {
   query
 } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js';
 import { db } from './firebase.js';
-import { resolveItemImage } from './item-images.js';
+import { resolveItemImage, resolveItemImageWidth } from './item-images.js';
 
 const COLLECTION_NAME = 'recipes';
 const RECIPE_SIZE_BY_INDEX = {
@@ -48,6 +48,7 @@ async function normalizeRecipe(doc, index) {
     name: data.name || '',
     overview: data.overview || '',
     image: manifestImage || data.image || '',
+    imageWidth: manifestImage ? resolveItemImageWidth(COLLECTION_NAME, doc.id) : 0,
     ingredients: ingredients.filter(Boolean),
     steps: Array.isArray(data.steps) ? data.steps.filter((step) => typeof step === 'string') : [],
     size: getRecipeSize(index)
