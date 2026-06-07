@@ -51,11 +51,21 @@ const PAGE_TITLE_TAB_LABELS = {
   recipes: 'Recettes',
   infos: 'Infos'
 };
+const PAGE_DESCRIPTION_BY_TAB = {
+  restaurants: 'Découvrez les restaurants de burgers au Luxembourg sélectionnés par BurgersOnly et trouvez les meilleures adresses près de vous.',
+  recipes: 'Découvrez des recettes de burgers maison, leurs ingrédients et leurs étapes de préparation avec BurgersOnly.',
+  infos: 'Retrouvez les conseils BurgersOnly pour choisir vos ingrédients, cuire vos steaks et réussir le montage de vos burgers.'
+};
 
-function updatePageTitle(routeState, itemTitle = '') {
+function updatePageMetadata(routeState, itemTitle = '', itemDescription = '') {
   const tabLabel = PAGE_TITLE_TAB_LABELS[routeState?.tab] || PAGE_TITLE_TAB_LABELS.restaurants;
+  const tabDescription = PAGE_DESCRIPTION_BY_TAB[routeState?.tab] || PAGE_DESCRIPTION_BY_TAB.restaurants;
   const cleanItemTitle = String(itemTitle || '').trim();
+  const cleanItemDescription = String(itemDescription || '').trim();
+  const descriptionElement = document.querySelector('meta[name="description"]');
+
   document.title = `${PAGE_TITLE_BASE} | ${cleanItemTitle || tabLabel}`;
+  descriptionElement?.setAttribute('content', cleanItemDescription || tabDescription);
 }
 
 function pushDataLayerEvent(eventName, payload = {}) {
@@ -267,7 +277,7 @@ routerController = initRouter({
   restaurantList,
   recipeList,
   getInfoItemsById: infosController.getInfoItemsById,
-  onTitleUpdate: updatePageTitle
+  onMetadataUpdate: updatePageMetadata
 });
 
 initBottomNavigation();

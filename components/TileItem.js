@@ -162,6 +162,7 @@ export function createTileItem(item, variant, onOpen, imagePriority = {}) {
   tile.dataset.expandedBody = item.expandedBody || '';
   tile.dataset.expandedList = JSON.stringify(item.expandedList || []);
   tile.dataset.expandedSteps = JSON.stringify(item.expandedSteps || []);
+  tile.dataset.metaDescription = item.metaDescription || '';
   if (item.routeId) {
     tile.dataset.routeId = item.routeId;
   }

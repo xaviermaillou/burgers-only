@@ -167,6 +167,9 @@ export function initRestaurantsController({
         routeId: toRouteId(restaurant.id, `restaurant-${index}`),
         name: restaurant.name,
         meta: restaurant.area,
+        metaDescription: restaurant.area
+          ? `Découvrez ${restaurant.name}, restaurant de burgers à ${restaurant.area}, sur BurgersOnly.`
+          : `Découvrez ${restaurant.name}, restaurant de burgers référencé sur BurgersOnly.`,
         image: restaurant.image || '',
         imageWidth: restaurant.imageWidth,
         maskIndex: useWideMask
