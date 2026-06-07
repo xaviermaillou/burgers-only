@@ -49,6 +49,7 @@ async function normalizeRecipe(doc, index) {
     overview: data.overview || '',
     image: manifestImage || data.image || '',
     ingredients: ingredients.filter(Boolean),
+    steps: Array.isArray(data.steps) ? data.steps.filter((step) => typeof step === 'string') : [],
     size: getRecipeSize(index)
   };
 }

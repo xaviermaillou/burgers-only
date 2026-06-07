@@ -119,6 +119,7 @@ export function createTileItem(item, variant, onOpen) {
   `;
   tile.dataset.expandedBody = item.expandedBody || '';
   tile.dataset.expandedList = JSON.stringify(item.expandedList || []);
+  tile.dataset.expandedSteps = JSON.stringify(item.expandedSteps || []);
   if (item.routeId) {
     tile.dataset.routeId = item.routeId;
   }

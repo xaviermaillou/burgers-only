@@ -46,22 +46,52 @@
 
 .tile-expanded-body {
   margin: 14px 0 0;
-  font-size: 1rem;
+  font-size: 1.08rem;
   line-height: 1.4;
   color: #2f2f2f;
 }
 
+.tile-expanded-heading {
+  margin: 24px 0 0;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
 .tile-expanded-list {
-  margin: 14px 0 0;
-  padding-left: 18px;
+  margin: 10px 0 0;
+  padding-left: 0;
   display: grid;
   gap: 6px;
   color: #2f2f2f;
+  list-style: none;
 }
 
 .tile-expanded-list li {
+  position: relative;
+  padding-left: 28px;
   font-size: 0.98rem;
   line-height: 1.35;
+}
+
+.tile-expanded-ingredients li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+}
+
+.tile-expanded-steps {
+  counter-reset: recipe-step;
+}
+
+.tile-expanded-steps li {
+  counter-increment: recipe-step;
+}
+
+.tile-expanded-steps li::before {
+  content: counter(recipe-step, upper-roman);
+  position: absolute;
+  left: 0;
+  font-weight: 700;
 }
 
 .restaurant-tile .tile-kicker {

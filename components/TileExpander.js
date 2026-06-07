@@ -14,13 +14,18 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
   let cleanupRunId = 0;
   let stackingTimer = null;
 
-  const readExpandedList = (tileElement) => {
+  const readArrayData = (tileElement, key) => {
     try {
-      const parsed = JSON.parse(tileElement.dataset.expandedList || '[]');
+      const parsed = JSON.parse(tileElement.dataset[key] || '[]');
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
+  };
+
+  const uppercaseFirst = (value) => {
+    const text = String(value || '');
+    return text ? `${text.charAt(0).toLocaleUpperCase()}${text.slice(1)}` : '';
   };
 
   const setFrame = (rect) => {
@@ -107,7 +112,8 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
 
     expander.className = `${tileElement.className} tile-expander`;
     const titleText = tileElement.querySelector('.tile-title')?.textContent || '';
-    const expandedList = readExpandedList(tileElement);
+    const expandedList = readArrayData(tileElement, 'expandedList');
+    const expandedSteps = readArrayData(tileElement, 'expandedSteps');
     const content = document.createElement('div');
     content.className = 'tile-expander-content';
     const imageUrl = tileElement.dataset.image || '';
@@ -146,20 +152,43 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     }
 
     if (expandedList.length) {
+      const ingredientsTitle = document.createElement('h2');
+      ingredientsTitle.className = 'tile-expanded-heading';
+      ingredientsTitle.textContent = 'Ingrédients';
+      top.appendChild(ingredientsTitle);
+
       const list = document.createElement('ul');
-      list.className = 'tile-expanded-list';
+      list.className = 'tile-expanded-list tile-expanded-ingredients';
 
       expandedList.forEach((item) => {
         const listItem = document.createElement('li');
-        listItem.textContent = item;
+        listItem.textContent = uppercaseFirst(item);
         list.appendChild(listItem);
       });
 
       top.appendChild(list);
     }
 
+    if (expandedSteps.length) {
+      const stepsTitle = document.createElement('h2');
+      stepsTitle.className = 'tile-expanded-heading';
+      stepsTitle.textContent = 'Étapes';
+      top.appendChild(stepsTitle);
+
+      const steps = document.createElement('ol');
+      steps.className = 'tile-expanded-list tile-expanded-steps';
+
+      expandedSteps.forEach((item) => {
+        const step = document.createElement('li');
+        step.textContent = item;
+        steps.appendChild(step);
+      });
+
+      top.appendChild(steps);
+    }
+
     if (titleText) {
-      const title = document.createElement('h3');
+      const title = document.createElement('h1');
       title.className = 'tile-title';
       title.textContent = titleText;
       bottom.appendChild(title);
