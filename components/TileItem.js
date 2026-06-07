@@ -91,7 +91,9 @@ function buildImageSrcSet(imageUrl, originalWidth) {
 
   const baseUrl = imageUrl.slice(0, extensionIndex);
   const candidates = [
+    { url: `${baseUrl}-200.webp`, width: 200 },
     { url: `${baseUrl}-300.webp`, width: 300 },
+    { url: `${baseUrl}-400.webp`, width: 400 },
     { url: `${baseUrl}-600.webp`, width: 600 },
     { url: `${baseUrl}-900.webp`, width: 900 },
     { url: imageUrl, width: originalWidth }
