@@ -4,6 +4,7 @@ import { initOptionsMenu } from './components/OptionsMenu.js';
 import { initBottomTabs } from './components/BottomTabs.js';
 import { initTileExpander } from './components/TileExpander.js';
 import { initInfoArticleReader } from './components/InfoArticleReader.js';
+import { updateTileImageLoading } from './components/TileCollection.js';
 import { gb, initGrowthBook } from './growthbook.js';
 import { initRouter, ROUTE_VIEW_TO_TAB } from './features/router.js';
 import { initAuthController } from './features/auth-controller.js';
@@ -196,6 +197,7 @@ function switchView(viewId) {
     const isTarget = view.id === viewId;
     view.classList.toggle('active', isTarget);
     view.setAttribute('aria-hidden', String(!isTarget));
+    updateTileImageLoading(view, isTarget);
   });
 
   if (viewsTrack) {

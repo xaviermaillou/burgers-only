@@ -15,7 +15,7 @@
   "type": "commonjs",
   "main": "app.js",
   "scripts": {
-    "build": "esbuild app.js styles.css --bundle --format=esm --minify --sourcemap --outdir=build",
+    "build": "esbuild app.js --bundle --format=esm --minify --sourcemap --outdir=build",
     "test": "test"
   },
   "dependencies": {
