@@ -101,6 +101,7 @@ export function initRestaurantsController({
   let userLocationCoords = null;
   let restaurantsRawCache = [];
   let restaurantsCache = [];
+  let loadPromise = null;
 
   const track = (eventName, payload = {}) => {
     if (typeof onTrackEvent === 'function') {
@@ -201,21 +202,27 @@ export function initRestaurantsController({
     }
   };
 
-  const loadRestaurants = async () => {
-    try {
-      restaurantsRawCache = await fetchRestaurants();
-      restaurantsCache = sortRestaurantsByProximity(restaurantsRawCache);
-      renderRestaurants(restaurantsCache);
-    } catch (error) {
-      console.error('Failed to load restaurants from Firestore.', error);
-      restaurantsRawCache = [];
-      restaurantsCache = [];
-      renderRestaurants([]);
-    } finally {
-      if (typeof onLoaded === 'function') {
-        onLoaded();
-      }
+  const loadRestaurants = () => {
+    if (!loadPromise) {
+      loadPromise = (async () => {
+        try {
+          restaurantsRawCache = await fetchRestaurants();
+          restaurantsCache = sortRestaurantsByProximity(restaurantsRawCache);
+          renderRestaurants(restaurantsCache);
+        } catch (error) {
+          console.error('Failed to load restaurants from Firestore.', error);
+          restaurantsRawCache = [];
+          restaurantsCache = [];
+          renderRestaurants([]);
+        } finally {
+          if (typeof onLoaded === 'function') {
+            onLoaded();
+          }
+        }
+      })();
     }
+
+    return loadPromise;
   };
 
   const updateUserLocation = (position) => {

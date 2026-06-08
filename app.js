@@ -42,6 +42,8 @@ const infoReaderBody = document.getElementById('infoReaderBody');
 
 let bottomTabs = null;
 let routerController = null;
+let restaurantsController = null;
+let recipesController = null;
 let navPositionVariant = 'bottom';
 let topNavInitialized = false;
 
@@ -196,6 +198,14 @@ function updateActiveViewHeight() {
   updateViewportHeight();
 }
 
+function loadViewData(viewId) {
+  if (viewId === 'restaurantsView') {
+    void restaurantsController?.loadRestaurants();
+  } else if (viewId === 'recipesView') {
+    void recipesController?.loadRecipes();
+  }
+}
+
 function switchView(viewId) {
   const activeIndex = viewIndexById.get(viewId) ?? 0;
   const activeView = views[activeIndex] || views[0] || null;
@@ -221,6 +231,8 @@ function switchView(viewId) {
   if (viewsViewport && nextViewportHeight) {
     viewsViewport.style.height = `${nextViewportHeight}px`;
   }
+
+  loadViewData(viewId);
   window.scrollTo(0, 0);
 }
 
@@ -290,7 +302,7 @@ initAuthController({
   onTrackEvent: pushDataLayerEvent
 });
 
-const restaurantsController = initRestaurantsController({
+restaurantsController = initRestaurantsController({
   target: restaurantList,
   tileExpander,
   onRouteUpdate: (patch, options) => {
@@ -303,7 +315,7 @@ const restaurantsController = initRestaurantsController({
   }
 });
 
-const recipesController = initRecipesController({
+recipesController = initRecipesController({
   target: recipeList,
   tileExpander,
   onRouteUpdate: (patch, options) => {
@@ -326,8 +338,6 @@ geotag.locate().then((position) => {
   restaurantsController.updateUserLocation(position);
 });
 
-restaurantsController.loadRestaurants();
-recipesController.loadRecipes();
 geotag.update();
 
 window.addEventListener('resize', () => {

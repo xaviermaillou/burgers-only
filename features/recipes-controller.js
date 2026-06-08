@@ -36,6 +36,8 @@ export function initRecipesController({
   onRendered = null,
   onLoaded = null
 }) {
+  let loadPromise = null;
+
   const track = (eventName, payload = {}) => {
     if (typeof onTrackEvent === 'function') {
       onTrackEvent(eventName, payload);
@@ -94,18 +96,24 @@ export function initRecipesController({
     }
   };
 
-  const loadRecipes = async () => {
-    try {
-      const recipes = await fetchRecipes();
-      renderRecipes(recipes);
-    } catch (error) {
-      console.error('Failed to load recipes from Firestore.', error);
-      renderRecipes([]);
-    } finally {
-      if (typeof onLoaded === 'function') {
-        onLoaded();
-      }
+  const loadRecipes = () => {
+    if (!loadPromise) {
+      loadPromise = (async () => {
+        try {
+          const recipes = await fetchRecipes();
+          renderRecipes(recipes);
+        } catch (error) {
+          console.error('Failed to load recipes from Firestore.', error);
+          renderRecipes([]);
+        } finally {
+          if (typeof onLoaded === 'function') {
+            onLoaded();
+          }
+        }
+      })();
     }
+
+    return loadPromise;
   };
 
   return {
