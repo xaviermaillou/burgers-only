@@ -147,7 +147,7 @@ export function initRouter({
   restaurantList,
   recipeList,
   getInfoItemsById,
-  onMetadataUpdate = null
+  onTitleUpdate = null
 }) {
   if (
     typeof switchView !== 'function' ||
@@ -181,10 +181,6 @@ export function initRouter({
     return findTileByRouteId(target, routeId)?.querySelector('.tile-title')?.textContent?.trim() || '';
   }
 
-  function readTileDescription(target, routeId) {
-    return findTileByRouteId(target, routeId)?.dataset.metaDescription?.trim() || '';
-  }
-
   function resolveRouteItemTitle(nextRouteState) {
     const item = nextRouteState?.item;
     if (!item) {
@@ -207,35 +203,9 @@ export function initRouter({
     return '';
   }
 
-  function resolveRouteItemDescription(nextRouteState) {
-    const item = nextRouteState?.item;
-    if (!item) {
-      return '';
-    }
-
-    if (item.type === 'restaurant') {
-      return readTileDescription(restaurantList, item.id);
-    }
-
-    if (item.type === 'recipe') {
-      return readTileDescription(recipeList, item.id);
-    }
-
-    if (item.type === 'info') {
-      const infoItemsById = typeof getInfoItemsById === 'function' ? getInfoItemsById() : null;
-      return infoItemsById instanceof Map ? infoItemsById.get(item.id)?.summary || '' : '';
-    }
-
-    return '';
-  }
-
-  function updateDocumentMetadata(
-    nextRouteState = routeState,
-    itemTitle = resolveRouteItemTitle(nextRouteState),
-    itemDescription = resolveRouteItemDescription(nextRouteState)
-  ) {
-    if (typeof onMetadataUpdate === 'function') {
-      onMetadataUpdate(nextRouteState, itemTitle, itemDescription);
+  function updateDocumentTitle(nextRouteState = routeState, itemTitle = resolveRouteItemTitle(nextRouteState)) {
+    if (typeof onTitleUpdate === 'function') {
+      onTitleUpdate(nextRouteState, itemTitle);
     }
   }
 
@@ -272,7 +242,7 @@ export function initRouter({
     });
 
     setRouteState(nextRouteState, { replace });
-    updateDocumentMetadata(normalizeRouteState(nextRouteState));
+    updateDocumentTitle(normalizeRouteState(nextRouteState));
   }
 
   function tryOpenPendingRouteItem() {
@@ -294,7 +264,7 @@ export function initRouter({
       }
 
       infoReader.open(infoItem);
-      updateDocumentMetadata(routeState, infoItem.title || '', infoItem.summary || '');
+      updateDocumentTitle(routeState, infoItem.title || '');
       pendingRouteItem = null;
       return;
     }
@@ -316,7 +286,7 @@ export function initRouter({
         }
 
         tileExpander.open(tileElement);
-        updateDocumentMetadata(routeState);
+        updateDocumentTitle(routeState, readTileTitle(restaurantList, id));
         pendingRouteItem = null;
       };
 
@@ -339,7 +309,7 @@ export function initRouter({
       }
 
       tileExpander.open(tileElement);
-      updateDocumentMetadata(routeState);
+      updateDocumentTitle(routeState, readTileTitle(restaurantList, id));
       pendingRouteItem = null;
       return;
     }
@@ -361,7 +331,7 @@ export function initRouter({
         }
 
         tileExpander.open(tileElement);
-        updateDocumentMetadata(routeState);
+        updateDocumentTitle(routeState, readTileTitle(recipeList, id));
         pendingRouteItem = null;
       };
 
@@ -384,7 +354,7 @@ export function initRouter({
       }
 
       tileExpander.open(tileElement);
-      updateDocumentMetadata(routeState);
+      updateDocumentTitle(routeState, readTileTitle(recipeList, id));
       pendingRouteItem = null;
       return;
     }
@@ -395,7 +365,7 @@ export function initRouter({
   function applyRouteState(nextRouteState, { replace = false } = {}) {
     const normalized = setRouteState(nextRouteState, { replace });
     switchView(ROUTE_TAB_TO_VIEW[normalized.tab]);
-    updateDocumentMetadata(normalized);
+    updateDocumentTitle(normalized);
 
     const wantsInfoOpen = normalized.item?.type === 'info';
     const wantsTileOpen =

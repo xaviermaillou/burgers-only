@@ -62,9 +62,6 @@ export function initRecipesController({
         expandedBody: recipe.overview,
         expandedList: recipe.ingredients.map((ingredient) => ingredient.name).filter(Boolean),
         expandedSteps: recipe.steps,
-        metaDescription: recipe.overview
-          ? `${recipe.overview} Retrouvez les ingrédients et les étapes de préparation sur BurgersOnly.`
-          : `Découvrez la recette ${recipe.name}, ses ingrédients et ses étapes de préparation sur BurgersOnly.`,
         image: recipe.image || '',
         imageWidth: recipe.imageWidth,
         maskKind: useWideMask ? 'wide' : 'square',
