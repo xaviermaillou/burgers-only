@@ -111,6 +111,8 @@ function buildMetadata({ type, id, title, description, image, structuredData }) 
   const route = `/${type}/${encodeURIComponent(id)}/`;
   const canonicalUrl = `${siteUrl}${route}`;
   const absoluteImage = image ? new URL(image, `${siteUrl}/`).href : '';
+  const organizationId = `${siteUrl}/#organization`;
+  const websiteId = `${siteUrl}/#website`;
   const tags = [
     '<base href="/" />',
     `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />`,
@@ -118,19 +120,47 @@ function buildMetadata({ type, id, title, description, image, structuredData }) 
     `<meta property="og:site_name" content="BurgersOnly" />`,
     `<meta property="og:title" content="${escapeHtml(title)}" />`,
     `<meta property="og:description" content="${escapeHtml(description)}" />`,
-    `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`,
-    '<meta name="twitter:card" content="summary_large_image" />',
-    `<meta name="twitter:title" content="${escapeHtml(title)}" />`,
-    `<meta name="twitter:description" content="${escapeHtml(description)}" />`
+    `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`
   ];
 
   if (absoluteImage) {
     tags.push(`<meta property="og:image" content="${escapeHtml(absoluteImage)}" />`);
-    tags.push(`<meta name="twitter:image" content="${escapeHtml(absoluteImage)}" />`);
   }
 
   if (structuredData) {
-    tags.push(`<script type="application/ld+json">${escapeJson(structuredData)}</script>`);
+    tags.push(
+      `<script type="application/ld+json">${escapeJson({
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'Organization',
+            '@id': organizationId,
+            name: 'BurgersOnly',
+            url: `${siteUrl}/`
+          },
+          {
+            '@type': 'WebSite',
+            '@id': websiteId,
+            name: 'BurgersOnly',
+            url: `${siteUrl}/`,
+            publisher: {
+              '@id': organizationId
+            }
+          },
+          {
+            ...structuredData,
+            '@id': canonicalUrl,
+            url: canonicalUrl,
+            publisher: {
+              '@id': organizationId
+            },
+            isPartOf: {
+              '@id': websiteId
+            }
+          }
+        ]
+      })}</script>`
+    );
   }
 
   return { route, tags: tags.join('\n  ') };
@@ -203,7 +233,6 @@ for (const restaurant of restaurants) {
     image,
     contentHtml: `<p>${escapeHtml(description)}</p>`,
     structuredData: {
-      '@context': 'https://schema.org',
       '@type': 'Restaurant',
       name: restaurant.name || 'Restaurant',
       image: `${siteUrl}${image}`,
@@ -220,8 +249,7 @@ for (const restaurant of restaurants) {
             latitude: restaurant.geo.latitude,
             longitude: restaurant.geo.longitude
           }
-        : undefined,
-      url: `${siteUrl}/restaurants/${encodeURIComponent(restaurant.id)}/`
+        : undefined
     }
   });
 }
@@ -252,7 +280,6 @@ for (const recipe of recipes) {
         : ''
     ].join(''),
     structuredData: {
-      '@context': 'https://schema.org',
       '@type': 'Recipe',
       name: recipe.name || 'Recette',
       description,
@@ -261,8 +288,7 @@ for (const recipe of recipes) {
       recipeInstructions: (recipe.steps || []).map((text) => ({
         '@type': 'HowToStep',
         text
-      })),
-      url: `${siteUrl}/recipes/${encodeURIComponent(recipe.id)}/`
+      }))
     }
   });
 }
@@ -275,12 +301,10 @@ for (const info of infos) {
     description: truncate(info.summary),
     contentHtml: info.content.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join(''),
     structuredData: {
-      '@context': 'https://schema.org',
       '@type': 'Article',
       headline: info.title,
       description: info.summary,
-      articleBody: info.content.join('\n\n'),
-      url: `${siteUrl}/infos/${encodeURIComponent(info.id)}/`
+      articleBody: info.content.join('\n\n')
     }
   });
 }
