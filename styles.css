@@ -47,7 +47,7 @@ body.geotag-hidden .location-wrap {
   display: inline-block;
 }
 
-/* styles/BurgerIcon.css */
+/* Menu button */
 .menu-btn {
   background: transparent;
   border: 0;
@@ -543,19 +543,6 @@ body.tile-open .menu-btn {
   background: #ffffff;
   overflow: hidden;
 }
-body.nav-top .bottom-nav {
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: auto;
-  width: 100%;
-  padding-top: var(--nav-top-padding);
-  z-index: 35;
-  transition: padding-top 260ms ease;
-}
-body.nav-top.geotag-hidden .bottom-nav {
-  padding-top: env(safe-area-inset-top, 0px);
-}
 .bottom-nav::before {
   content: "";
   position: absolute;
@@ -571,9 +558,6 @@ body.nav-top.geotag-hidden .bottom-nav {
   pointer-events: none;
   z-index: 0;
 }
-body.nav-top .bottom-nav::before {
-  display: none;
-}
 .bottom-nav-track {
   display: flex;
   justify-content: flex-start;
@@ -582,9 +566,6 @@ body.nav-top .bottom-nav::before {
   padding: 16px 22px calc(env(safe-area-inset-bottom, 0px) + 14px);
   position: relative;
   z-index: 1;
-}
-body.nav-top .bottom-nav-track {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
 }
 .nav-item {
   border: 0;
@@ -789,10 +770,6 @@ body.menu-open .topbar {
   --tile-ink-muted: rgba(255, 255, 255, 0.86);
   --gap: 18px;
   --header-top: calc(env(safe-area-inset-top, 0px) + 18px);
-  --geotag-height: 28px;
-  --nav-top-padding: calc(var(--header-top) + var(--geotag-height) + 8px);
-  --nav-top-offset: calc(var(--header-top) + 40px);
-  --nav-height: 88px;
 }
 * {
   box-sizing: border-box;
@@ -811,17 +788,6 @@ body {
   min-height: 100vh;
   padding: calc(env(safe-area-inset-top, 0px) + 90px) 20px 104px;
   background: #ffffff;
-}
-body.nav-top .app-shell {
-  padding: calc(var(--nav-top-offset) + var(--nav-height) + 10px) 20px calc(env(safe-area-inset-bottom, 0px) + 18px);
-  transition: padding-top 260ms ease;
-}
-body.nav-top.geotag-hidden .app-shell {
-  padding-top: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + 10px);
-}
-body.nav-top.nav-top-initializing .app-shell,
-body.nav-top.nav-top-initializing .bottom-nav {
-  transition: none;
 }
 .views-viewport {
   overflow: hidden;

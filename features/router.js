@@ -276,6 +276,44 @@ export function initRouter({
     updateDocumentTitle(normalizeRouteState(nextRouteState));
   }
 
+  function openPendingTile(type, id) {
+    const target = type === 'restaurant' ? restaurantList : recipeList;
+    const isLoaded = type === 'restaurant' ? restaurantsLoaded : recipesLoaded;
+    if (!isLoaded) {
+      return;
+    }
+
+    const openTile = () => {
+      if (!pendingRouteItem || pendingRouteItem.type !== type || pendingRouteItem.id !== id) {
+        return;
+      }
+
+      const tileElement = findTileByRouteId(target, id);
+      if (!tileElement) {
+        updateRouteFromUI({ item: null }, { replace: true });
+        return;
+      }
+
+      tileExpander.open(tileElement);
+      updateDocumentTitle(routeState, readTileTitle(target, id));
+      pendingRouteItem = null;
+    };
+
+    if (!tileExpander.isOpen()) {
+      openTile();
+      return;
+    }
+
+    if (tileExpander.getActiveRouteId() === id) {
+      pendingRouteItem = null;
+      return;
+    }
+
+    suppressTileCloseRouteSync = true;
+    tileExpander.close();
+    window.setTimeout(openTile, 430);
+  }
+
   function tryOpenPendingRouteItem() {
     if (!pendingRouteItem) {
       return;
@@ -300,93 +338,8 @@ export function initRouter({
       return;
     }
 
-    if (type === 'restaurant') {
-      if (!restaurantsLoaded) {
-        return;
-      }
-
-      const openRestaurantTile = () => {
-        if (!pendingRouteItem || pendingRouteItem.type !== 'restaurant' || pendingRouteItem.id !== id) {
-          return;
-        }
-
-        const tileElement = findTileByRouteId(restaurantList, id);
-        if (!tileElement) {
-          updateRouteFromUI({ item: null }, { replace: true });
-          return;
-        }
-
-        tileExpander.open(tileElement);
-        updateDocumentTitle(routeState, readTileTitle(restaurantList, id));
-        pendingRouteItem = null;
-      };
-
-      if (tileExpander.isOpen()) {
-        if (tileExpander.getActiveRouteId() === id) {
-          pendingRouteItem = null;
-          return;
-        }
-
-        suppressTileCloseRouteSync = true;
-        tileExpander.close();
-        window.setTimeout(openRestaurantTile, 430);
-        return;
-      }
-
-      const tileElement = findTileByRouteId(restaurantList, id);
-      if (!tileElement) {
-        updateRouteFromUI({ item: null }, { replace: true });
-        return;
-      }
-
-      tileExpander.open(tileElement);
-      updateDocumentTitle(routeState, readTileTitle(restaurantList, id));
-      pendingRouteItem = null;
-      return;
-    }
-
-    if (type === 'recipe') {
-      if (!recipesLoaded) {
-        return;
-      }
-
-      const openRecipeTile = () => {
-        if (!pendingRouteItem || pendingRouteItem.type !== 'recipe' || pendingRouteItem.id !== id) {
-          return;
-        }
-
-        const tileElement = findTileByRouteId(recipeList, id);
-        if (!tileElement) {
-          updateRouteFromUI({ item: null }, { replace: true });
-          return;
-        }
-
-        tileExpander.open(tileElement);
-        updateDocumentTitle(routeState, readTileTitle(recipeList, id));
-        pendingRouteItem = null;
-      };
-
-      if (tileExpander.isOpen()) {
-        if (tileExpander.getActiveRouteId() === id) {
-          pendingRouteItem = null;
-          return;
-        }
-
-        suppressTileCloseRouteSync = true;
-        tileExpander.close();
-        window.setTimeout(openRecipeTile, 430);
-        return;
-      }
-
-      const tileElement = findTileByRouteId(recipeList, id);
-      if (!tileElement) {
-        updateRouteFromUI({ item: null }, { replace: true });
-        return;
-      }
-
-      tileExpander.open(tileElement);
-      updateDocumentTitle(routeState, readTileTitle(recipeList, id));
-      pendingRouteItem = null;
+    if (type === 'restaurant' || type === 'recipe') {
+      openPendingTile(type, id);
       return;
     }
 

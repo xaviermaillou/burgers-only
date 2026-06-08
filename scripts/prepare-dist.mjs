@@ -11,6 +11,7 @@ const productionHtml = sourceHtml.replace(
 await Promise.all([
   writeFile('dist/index.html', productionHtml),
   cp('styles.css', 'dist/styles.css'),
+  cp('nav-top.css', 'dist/nav-top.css'),
   cp('data/luxembourg-areas.json', 'dist/data/luxembourg-areas.json'),
   cp('data/masks', 'dist/data/masks', { recursive: true }),
   cp('data/test-assets', 'dist/data/test-assets', { recursive: true }),

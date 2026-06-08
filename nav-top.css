@@ -1,0 +1,40 @@
+:root {
+  --geotag-height: 28px;
+  --nav-top-padding: calc(var(--header-top) + var(--geotag-height) + 8px);
+  --nav-top-offset: calc(var(--header-top) + 40px);
+  --nav-height: 88px;
+}
+
+body.nav-top .bottom-nav {
+  top: 0;
+  bottom: auto;
+  padding-top: var(--nav-top-padding);
+  z-index: 35;
+  transition: padding-top 260ms ease;
+}
+
+body.nav-top.geotag-hidden .bottom-nav {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+body.nav-top .bottom-nav::before {
+  display: none;
+}
+
+body.nav-top .bottom-nav-track {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+}
+
+body.nav-top .app-shell {
+  padding: calc(var(--nav-top-offset) + var(--nav-height) + 10px) 20px calc(env(safe-area-inset-bottom, 0px) + 18px);
+  transition: padding-top 260ms ease;
+}
+
+body.nav-top.geotag-hidden .app-shell {
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + 10px);
+}
+
+body.nav-top.nav-top-initializing .app-shell,
+body.nav-top.nav-top-initializing .bottom-nav {
+  transition: none;
+}

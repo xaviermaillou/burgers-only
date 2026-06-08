@@ -4,8 +4,7 @@ export function initInfoArticleReader({ overlay, titleElement, bodyElement, clos
       open: () => {},
       close: () => {},
       isOpen: () => false,
-      handleEscape: () => false,
-      destroy: () => {}
+      handleEscape: () => false
     };
   }
 
@@ -68,12 +67,6 @@ export function initInfoArticleReader({ overlay, titleElement, bodyElement, clos
         return true;
       }
       return false;
-    },
-    destroy() {
-      overlay.removeEventListener('click', onOverlayClick);
-      if (closeButton) {
-        closeButton.removeEventListener('click', onCloseClick);
-      }
     }
   };
 }

@@ -53,8 +53,7 @@ export function initGeotag({ element, threshold = 28, hiddenClass = 'geotag-hidd
   if (!element) {
     return {
       locate: async () => {},
-      update: () => {},
-      destroy: () => {}
+      update: () => {}
     };
   }
 
@@ -121,9 +120,6 @@ export function initGeotag({ element, threshold = 28, hiddenClass = 'geotag-hidd
 
   return {
     locate,
-    update,
-    destroy() {
-      window.removeEventListener('scroll', update);
-    }
+    update
   };
 }

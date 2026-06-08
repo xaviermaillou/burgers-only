@@ -64,23 +64,16 @@ export function initBottomTabs({ bottomNav, bottomNavTrack, items, onSelect }) {
     updateScrollPosition(activeIndex);
   };
 
-  const listeners = tabs.map((item) => {
-    const handler = (event) => {
+  tabs.forEach((item) => {
+    item.addEventListener('click', (event) => {
       event.preventDefault();
       if (typeof onSelect === 'function') {
         onSelect(item.dataset.viewTarget);
       }
-    };
-
-    item.addEventListener('click', handler);
-    return { item, handler };
+    });
   });
 
   return {
-    setActive,
-    destroy() {
-      window.cancelAnimationFrame(scrollAnimationFrame);
-      listeners.forEach(({ item, handler }) => item.removeEventListener('click', handler));
-    }
+    setActive
   };
 }

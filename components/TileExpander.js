@@ -4,8 +4,8 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
       open: () => {},
       close: () => {},
       isOpen: () => false,
-      handleEscape: () => false,
-      destroy: () => {}
+      getActiveRouteId: () => null,
+      handleEscape: () => false
     };
   }
 
@@ -300,13 +300,6 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
         return true;
       }
       return false;
-    },
-    destroy() {
-      window.clearTimeout(stackingTimer);
-      overlay.removeEventListener('click', onOverlayClick);
-      if (closeButton) {
-        closeButton.removeEventListener('click', onCloseClick);
-      }
     }
   };
 }

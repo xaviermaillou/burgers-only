@@ -1,12 +1,7 @@
-export function initOptionsMenu({ menuElement, burgerIcon, onOpen }) {
-  if (!menuElement || !burgerIcon) {
+export function initOptionsMenu({ menuElement, toggleButton, onOpen }) {
+  if (!menuElement || !toggleButton) {
     return {
-      open: () => {},
-      close: () => {},
-      toggle: () => {},
-      isOpen: () => false,
-      handleEscape: () => false,
-      destroy: () => {}
+      handleEscape: () => false
     };
   }
 
@@ -15,7 +10,7 @@ export function initOptionsMenu({ menuElement, burgerIcon, onOpen }) {
   const open = () => {
     menuElement.classList.add('open');
     menuElement.setAttribute('aria-hidden', 'false');
-    burgerIcon.setExpanded(true);
+    toggleButton.setAttribute('aria-expanded', 'true');
     document.body.classList.add('menu-open');
 
     if (typeof onOpen === 'function') {
@@ -26,7 +21,7 @@ export function initOptionsMenu({ menuElement, burgerIcon, onOpen }) {
   const close = () => {
     menuElement.classList.remove('open');
     menuElement.setAttribute('aria-hidden', 'true');
-    burgerIcon.setExpanded(false);
+    toggleButton.setAttribute('aria-expanded', 'false');
     document.body.classList.remove('menu-open');
   };
 
@@ -38,30 +33,22 @@ export function initOptionsMenu({ menuElement, burgerIcon, onOpen }) {
     }
   };
 
-  const offToggle = burgerIcon.onToggle(toggle);
   const onBackdropClick = (event) => {
     if (event.target === menuElement) {
       close();
     }
   };
 
+  toggleButton.addEventListener('click', toggle);
   menuElement.addEventListener('click', onBackdropClick);
 
   return {
-    open,
-    close,
-    toggle,
-    isOpen,
     handleEscape(event) {
       if (event.key === 'Escape' && isOpen()) {
         close();
         return true;
       }
       return false;
-    },
-    destroy() {
-      offToggle();
-      menuElement.removeEventListener('click', onBackdropClick);
     }
   };
 }

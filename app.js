@@ -1,5 +1,4 @@
 import { initGeotag } from './components/Geotag.js';
-import { initBurgerIcon } from './components/BurgerIcon.js';
 import { initOptionsMenu } from './components/OptionsMenu.js';
 import { initBottomTabs } from './components/BottomTabs.js';
 import { initTileExpander } from './components/TileExpander.js';
@@ -44,8 +43,6 @@ let bottomTabs = null;
 let routerController = null;
 let restaurantsController = null;
 let recipesController = null;
-let navPositionVariant = 'bottom';
-let topNavInitialized = false;
 
 const PAGE_TITLE_BASE = 'BurgersOnly';
 const PAGE_TITLE_TAB_LABELS = {
@@ -113,69 +110,6 @@ function initBottomNavigation() {
   }
 }
 
-function normalizeNavPosition(value) {
-  return value === 'top' ? 'top' : 'bottom';
-}
-
-function updateTopNavLayoutMetrics() {
-  if (navPositionVariant !== 'top' || !bottomNav) {
-    return;
-  }
-
-  const topbarBottom = topbar?.getBoundingClientRect()?.bottom || 0;
-  const navHeight = bottomNav.getBoundingClientRect().height || 0;
-  const geotagHeight = geotagElement?.getBoundingClientRect()?.height || 0;
-  const navTopOffset = Math.max(0, Math.ceil(topbarBottom + 8));
-  const measuredNavHeight = Math.max(0, Math.ceil(navHeight));
-  const measuredGeotagHeight = Math.max(0, Math.ceil(geotagHeight));
-
-  document.documentElement.style.setProperty('--geotag-height', `${measuredGeotagHeight}px`);
-  document.documentElement.style.setProperty('--nav-top-padding', `${navTopOffset}px`);
-  document.documentElement.style.setProperty('--nav-top-offset', `${navTopOffset}px`);
-  document.documentElement.style.setProperty('--nav-height', `${measuredNavHeight}px`);
-}
-
-function applyNavPosition(position) {
-  navPositionVariant = normalizeNavPosition(position);
-  const isTopNav = navPositionVariant === 'top';
-  document.body.classList.toggle('nav-top', isTopNav);
-
-  if (!isTopNav) {
-    document.body.classList.remove('nav-top-initializing');
-    document.documentElement.style.removeProperty('--geotag-height');
-    document.documentElement.style.removeProperty('--nav-top-padding');
-    document.documentElement.style.removeProperty('--nav-top-offset');
-    document.documentElement.style.removeProperty('--nav-height');
-    window.requestAnimationFrame(() => {
-      updateActiveViewHeight();
-    });
-    return;
-  }
-
-  const shouldDisableInitialTransition = !topNavInitialized;
-  if (shouldDisableInitialTransition) {
-    document.body.classList.add('nav-top-initializing');
-  }
-
-  window.requestAnimationFrame(() => {
-    updateTopNavLayoutMetrics();
-    updateActiveViewHeight();
-
-    if (shouldDisableInitialTransition) {
-      window.requestAnimationFrame(() => {
-        document.body.classList.remove('nav-top-initializing');
-        topNavInitialized = true;
-      });
-    }
-  });
-}
-
-function applyNavPositionFromGrowthBook() {
-  const navPositionFeature = gb.getFeatureValue('nav-position', 'bottom');
-  // applyNavPosition(navPositionFeature);
-  applyNavPosition('bottom');
-}
-
 function updateViewportHeight(activeView = document.querySelector('.view.active')) {
   if (!viewsViewport || !activeView) {
     return;
@@ -186,6 +120,20 @@ function updateViewportHeight(activeView = document.querySelector('.view.active'
 
 function updateActiveViewHeight() {
   updateViewportHeight();
+}
+
+async function applyNavPositionFromGrowthBook() {
+  if (gb.getFeatureValue('nav-position', 'bottom') !== 'top') {
+    return;
+  }
+
+  const { initTopNavigation } = await import('./features/top-navigation.js');
+  await initTopNavigation({
+    bottomNav,
+    topbar,
+    geotagElement,
+    onLayoutChange: updateActiveViewHeight
+  });
 }
 
 function loadViewData(viewId) {
@@ -227,10 +175,9 @@ function switchView(viewId) {
 }
 
 const geotag = initGeotag({ element: geotagElement, threshold: 28 });
-const burgerIcon = initBurgerIcon(menuButton);
 const optionsMenu = initOptionsMenu({
   menuElement: optionsMenuElement,
-  burgerIcon,
+  toggleButton: menuButton,
   onOpen: () => {
     pushDataLayerEvent('open_menu', {
       menu_name: 'options'
@@ -283,7 +230,6 @@ routerController = initRouter({
 });
 
 initBottomNavigation();
-applyNavPositionFromGrowthBook();
 
 initAuthController({
   googleAuthButton,
@@ -318,20 +264,16 @@ recipesController = initRecipesController({
   }
 });
 
-void initGrowthBook().then(() => {
-  applyNavPositionFromGrowthBook();
-});
+void initGrowthBook().then(applyNavPositionFromGrowthBook);
 routerController.applyRouteFromLocation({ replace: true });
 
 geotag.locate().then((position) => {
-  updateTopNavLayoutMetrics();
   restaurantsController.updateUserLocation(position);
 });
 
 geotag.update();
 
 window.addEventListener('resize', () => {
-  updateTopNavLayoutMetrics();
   const activeView = document.querySelector('.view.active');
   if (activeView) {
     updateViewportHeight(activeView);

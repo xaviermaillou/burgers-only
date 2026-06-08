@@ -12,13 +12,13 @@
   },
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "clean": "node scripts/clean-generated.mjs",
     "build": "npm run clean && npm run build:prepare && npm run build:app && npm run build:ssg",
     "build:prepare": "node scripts/prepare-dist.mjs",
-    "build:app": "esbuild app.js --bundle --format=esm --minify --sourcemap --outdir=dist/assets",
+    "build:app": "esbuild app.js --bundle --format=esm --splitting --minify --sourcemap --outdir=dist/assets",
     "build:ssg": "node scripts/generate-static-pages.mjs",
     "test": "test"
   },
