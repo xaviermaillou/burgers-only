@@ -5,7 +5,7 @@ function formatCoordinate(value, positiveLabel, negativeLabel) {
 }
 
 async function loadAreas() {
-  const response = await fetch('./data/luxembourg-areas.json');
+  const response = await fetch('/data/luxembourg-areas.json');
   if (!response.ok) {
     throw new Error(`Failed to load Luxembourg areas: ${response.status}`);
   }

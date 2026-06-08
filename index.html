@@ -17,7 +17,7 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0d12" />
   <meta name="description" content="Découvrez les restaurants, recettes et conseils autour du burger avec BurgersOnly." />
   <title>BurgersOnly</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
   <script type="importmap">
     {
       "imports": {
@@ -148,7 +148,7 @@
       const script = document.createElement("script");
       const cacheBuster = Date.now();
 
-      script.src = isProductionHost ? `build/app.js?v=${cacheBuster}` : `app.js?v=${cacheBuster}`;
+      script.src = isProductionHost ? `/build/app.js?v=${cacheBuster}` : `/app.js?v=${cacheBuster}`;
       script.type = "module";
 
       document.body.appendChild(script);

@@ -44,6 +44,12 @@ bower_components
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/
 build/Release
+dist/
+restaurants/
+recipes/
+infos/
+sitemap.xml
+robots.txt
 
 # Dependency directories
 node_modules/

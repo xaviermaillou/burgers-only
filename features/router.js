@@ -22,6 +22,18 @@ const ROUTE_ITEM_TYPE_TO_PARAM = {
   info: 'info'
 };
 
+const ROUTE_ITEM_TYPE_TO_PATH = {
+  restaurant: 'restaurants',
+  recipe: 'recipes',
+  info: 'infos'
+};
+
+const ROUTE_PATH_TO_ITEM_TYPE = {
+  restaurants: 'restaurant',
+  recipes: 'recipe',
+  infos: 'info'
+};
+
 const ROUTE_KEYS = ['tab', 'restaurant', 'recipe', 'info'];
 
 function normalizeRouteTab(tab) {
@@ -100,6 +112,21 @@ function parseRouteStateFromLocation() {
     item = { type: 'info', id: infoId };
   }
 
+  if (!item) {
+    const pathMatch = window.location.pathname.match(/^\/(restaurants|recipes|infos)\/([^/]+)\/?$/);
+    const pathItemType = pathMatch ? ROUTE_PATH_TO_ITEM_TYPE[pathMatch[1]] : '';
+    if (pathItemType) {
+      try {
+        item = {
+          type: pathItemType,
+          id: decodeURIComponent(pathMatch[2])
+        };
+      } catch {
+        item = null;
+      }
+    }
+  }
+
   const inferredTab = item ? ROUTE_ITEM_TYPE_TO_TAB[item.type] : 'restaurants';
   return normalizeRouteState({
     tab: explicitTab || inferredTab,
@@ -112,12 +139,16 @@ function buildRouteUrl(nextRouteState) {
   const url = new URL(window.location.href);
 
   ROUTE_KEYS.forEach((key) => url.searchParams.delete(key));
-  url.searchParams.set('tab', normalized.tab);
 
   if (normalized.item) {
-    const paramName = ROUTE_ITEM_TYPE_TO_PARAM[normalized.item.type];
-    if (paramName) {
-      url.searchParams.set(paramName, normalized.item.id);
+    const pathName = ROUTE_ITEM_TYPE_TO_PATH[normalized.item.type];
+    if (pathName) {
+      url.pathname = `/${pathName}/${encodeURIComponent(normalized.item.id)}/`;
+    }
+  } else {
+    url.pathname = '/';
+    if (normalized.tab !== 'restaurants') {
+      url.searchParams.set('tab', normalized.tab);
     }
   }
 

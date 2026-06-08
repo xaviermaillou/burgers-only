@@ -15,7 +15,11 @@
   "type": "commonjs",
   "main": "app.js",
   "scripts": {
-    "build": "esbuild app.js --bundle --format=esm --minify --sourcemap --outdir=build",
+    "clean": "node scripts/clean-generated.mjs",
+    "build": "npm run clean && npm run build:prepare && npm run build:app && npm run build:ssg",
+    "build:prepare": "node scripts/prepare-dist.mjs",
+    "build:app": "esbuild app.js --bundle --format=esm --minify --sourcemap --outdir=dist/assets",
+    "build:ssg": "node scripts/generate-static-pages.mjs",
     "test": "test"
   },
   "dependencies": {

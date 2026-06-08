@@ -12,7 +12,7 @@ const MASK_CONFIG = {
     prefix: 'tile-mask-wide'
   }
 };
-const TEST_FALLBACK_IMAGE = 'data/test-assets/mock-burger-mask-test.svg';
+const TEST_FALLBACK_IMAGE = '/data/test-assets/mock-burger-mask-test.svg';
 
 function normalizeMaskKind(value) {
   return value === MASK_KIND_WIDE ? MASK_KIND_WIDE : MASK_KIND_SQUARE;
@@ -117,19 +117,11 @@ function getTileImageSizes(size) {
 function buildTileHref(item, variant) {
   const routeId = String(item.routeId || '').trim();
   if (!routeId) {
-    return window.location.pathname;
+    return '/';
   }
 
-  const type = variant === 'restaurant' ? 'restaurant' : 'recipe';
-  const tab = variant === 'restaurant' ? 'restaurants' : 'recipes';
-  const url = new URL(window.location.href);
-
-  ['tab', 'restaurant', 'recipe', 'info'].forEach((key) => url.searchParams.delete(key));
-  url.searchParams.set('tab', tab);
-  url.searchParams.set(type, routeId);
-
-  const query = url.searchParams.toString();
-  return `${url.pathname}${query ? `?${query}` : ''}${url.hash}`;
+  const path = variant === 'restaurant' ? 'restaurants' : 'recipes';
+  return `/${path}/${encodeURIComponent(routeId)}/`;
 }
 
 export function createTileItem(item, variant, onOpen, imagePriority = {}) {
@@ -168,7 +160,7 @@ export function createTileItem(item, variant, onOpen, imagePriority = {}) {
   if (imageUrl) {
     tile.dataset.image = imageUrl;
     tile.dataset.imageSrcset = imageSrcSet;
-    const maskUrl = resolveAssetUrl(`data/masks/${maskName}`);
+    const maskUrl = resolveAssetUrl(`/data/masks/${maskName}`);
     tile.dataset.maskUrl = maskUrl;
     tile.style.setProperty('--tile-mask-url', `url("${maskUrl}")`);
   }
