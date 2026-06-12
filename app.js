@@ -173,7 +173,13 @@ function switchView(viewId) {
   window.scrollTo(0, 0);
 }
 
-const geotag = initGeotag({ element: geotagElement, threshold: 28 });
+const geotag = initGeotag({
+  element: geotagElement,
+  threshold: 28,
+  onLocated: (position) => {
+    restaurantsController?.updateUserLocation(position);
+  }
+});
 const optionsMenu = initOptionsMenu({
   menuElement: optionsMenuElement,
   toggleButton: menuButton,
@@ -299,10 +305,6 @@ recipesController = initRecipesController({
 
 // void initGrowthBook().then(applyNavPositionFromGrowthBook);
 routerController.applyRouteFromLocation({ replace: true });
-
-geotag.locate().then((position) => {
-  restaurantsController.updateUserLocation(position);
-});
 
 geotag.update();
 

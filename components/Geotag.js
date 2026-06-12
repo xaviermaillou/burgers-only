@@ -49,7 +49,12 @@ function resolveArea(coords, areas) {
   return match || { name: 'Luxembourg' };
 }
 
-export function initGeotag({ element, threshold = 28, hiddenClass = 'geotag-hidden' }) {
+export function initGeotag({
+  element,
+  threshold = 28,
+  hiddenClass = 'geotag-hidden',
+  onLocated = null
+}) {
   if (!element) {
     return {
       locate: async () => {},
@@ -84,11 +89,12 @@ export function initGeotag({ element, threshold = 28, hiddenClass = 'geotag-hidd
 
   const locate = async () => {
     if (!('geolocation' in navigator)) {
-      setText('Geolocalisation indisponible');
-      return;
+      setText('Localisation indisponible');
+      return null;
     }
 
     setText('Localisation en cours...');
+    element.disabled = true;
 
     return new Promise((resolve) => {
       navigator.geolocation.getCurrentPosition(
@@ -101,10 +107,15 @@ export function initGeotag({ element, threshold = 28, hiddenClass = 'geotag-hidd
             setText(formatPosition(position.coords, ''));
           }
 
+          element.disabled = false;
+          if (typeof onLocated === 'function') {
+            onLocated(position);
+          }
           resolve(position);
         },
         () => {
-          setText('Localisation refusee');
+          setText('Autoriser la localisation');
+          element.disabled = false;
           resolve(null);
         },
         {
@@ -116,6 +127,7 @@ export function initGeotag({ element, threshold = 28, hiddenClass = 'geotag-hidd
     });
   };
 
+  element.addEventListener('click', locate);
   window.addEventListener('scroll', update, { passive: true });
 
   return {

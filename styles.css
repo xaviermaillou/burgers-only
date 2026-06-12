@@ -17,10 +17,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   min-width: 0;
   position: relative;
   z-index: 1;
   transition: opacity 260ms ease;
+}
+.location-wrap:disabled {
+  cursor: default;
 }
 body.geotag-hidden .location-wrap {
   opacity: 0;
@@ -45,6 +56,11 @@ body.geotag-hidden .location-wrap {
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   display: inline-block;
+}
+@media (max-width: 599px) {
+  .location-text {
+    font-size: 1.3rem;
+  }
 }
 
 /* Menu button */
