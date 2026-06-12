@@ -1,3 +1,8 @@
+import {
+  isInitialItemRoute,
+  revealInitialItemRoute
+} from '../features/initial-item-route.js';
+
 export function initInfoArticleReader({ overlay, titleElement, bodyElement, closeButton, onClose = null }) {
   if (!overlay || !titleElement || !bodyElement) {
     return {
@@ -15,6 +20,7 @@ export function initInfoArticleReader({ overlay, titleElement, bodyElement, clos
       return;
     }
 
+    const instant = isInitialItemRoute();
     titleElement.textContent = item.title || '';
     bodyElement.innerHTML = '';
 
@@ -28,6 +34,11 @@ export function initInfoArticleReader({ overlay, titleElement, bodyElement, clos
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('info-open');
+
+    if (instant) {
+      overlay.getBoundingClientRect();
+      revealInitialItemRoute();
+    }
   };
 
   const close = () => {

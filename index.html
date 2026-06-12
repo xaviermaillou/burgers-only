@@ -16,6 +16,19 @@
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0d12" />
   <meta name="description" content="Découvrez les restaurants, recettes et conseils autour du burger avec BurgersOnly." />
+  <script>
+    (function prepareDirectItemRoute() {
+      const params = new URLSearchParams(window.location.search);
+      const itemType = window.location.pathname.match(/^\/(restaurants|recipes|infos)\/[^/]+\/?$/)?.[1]
+        || ['restaurant', 'recipe', 'info'].find((type) => params.has(type));
+      if (itemType) {
+        document.documentElement.classList.add('item-route-loading');
+        if (!itemType.startsWith('info')) {
+          document.documentElement.setAttribute('data-defer-tile-images', '');
+        }
+      }
+    })();
+  </script>
   <title>BurgersOnly</title>
   <link rel="stylesheet" href="/styles.css" />
   <script type="importmap">

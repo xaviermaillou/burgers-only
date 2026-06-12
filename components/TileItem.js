@@ -136,11 +136,13 @@ export function createTileItem(item, variant, onOpen, imagePriority = {}) {
   const fetchPriority = imagePriority.highPriority ? 'high' : 'auto';
   const imageSrcSet = buildImageSrcSet(imageUrl, item.imageWidth);
   const imageSizes = getTileImageSizes(item.size);
+  const sourceAttribute = imagePriority.deferred ? 'data-src' : 'src';
+  const srcsetAttribute = imagePriority.deferred ? 'data-srcset' : 'srcset';
   const responsiveAttributes = imageSrcSet
-    ? ` srcset="${imageSrcSet}" sizes="${imageSizes}"`
+    ? ` ${srcsetAttribute}="${imageSrcSet}" sizes="${imageSizes}"`
     : '';
   const imageMarkup = imageUrl
-    ? `<img src="${imageUrl}"${responsiveAttributes} alt="" class="tile-bg-image" loading="${imageLoading}" fetchpriority="${fetchPriority}" decoding="async" />`
+    ? `<img ${sourceAttribute}="${imageUrl}"${responsiveAttributes} alt="" class="tile-bg-image" loading="${imageLoading}" fetchpriority="${fetchPriority}" decoding="async" />`
     : '';
 
   tile.className = `tile ${variantClass} ${item.size} ${hasImageClass}`;
@@ -162,7 +164,9 @@ export function createTileItem(item, variant, onOpen, imagePriority = {}) {
     tile.dataset.imageSrcset = imageSrcSet;
     const maskUrl = resolveAssetUrl(`/data/masks/${maskName}`);
     tile.dataset.maskUrl = maskUrl;
-    tile.style.setProperty('--tile-mask-url', `url("${maskUrl}")`);
+    if (!imagePriority.deferred) {
+      tile.style.setProperty('--tile-mask-url', `url("${maskUrl}")`);
+    }
   }
 
   if (typeof onOpen === 'function') {

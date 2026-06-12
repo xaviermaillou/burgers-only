@@ -1,3 +1,5 @@
+import { clearInitialItemRoute } from './initial-item-route.js';
+
 const ROUTE_TAB_TO_VIEW = {
   restaurants: 'restaurantsView',
   recipes: 'recipesView',
@@ -257,6 +259,9 @@ export function initRouter({
 
     routeState = normalized;
     pendingRouteItem = normalized.item ? { ...normalized.item } : null;
+    if (!normalized.item) {
+      clearInitialItemRoute(document.querySelector('.view.active'));
+    }
 
     if (changed || replace) {
       writeRouteToHistory(normalized, { replace });

@@ -1,3 +1,9 @@
+import {
+  clearInitialItemRoute,
+  isInitialItemRoute,
+  revealInitialItemRoute
+} from '../features/initial-item-route.js';
+
 export function initTileExpander({ overlay, expander, closeButton, inset = 12, onClose = null }) {
   if (!overlay || !expander) {
     return {
@@ -104,8 +110,9 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
       return;
     }
 
+    const instant = isInitialItemRoute();
     cleanupRunId += 1;
-    isAnimating = true;
+    isAnimating = !instant;
     activeTileElement = tileElement;
     window.clearTimeout(stackingTimer);
     overlay.classList.remove('behind-nav');
@@ -134,16 +141,16 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     if (imageUrl) {
       const media = document.createElement('div');
       media.className = 'tile-expander-media';
-      if (maskUrl) {
+      if (maskUrl && !instant) {
         content.style.setProperty('--tile-mask-url', `url("${maskUrl}")`);
       }
 
       const image = document.createElement('img');
-      image.src = imageUrl;
       if (tileElement.dataset.imageSrcset) {
         image.srcset = tileElement.dataset.imageSrcset;
         image.sizes = `calc(100vw - ${inset * 2}px)`;
       }
+      image.src = imageUrl;
       image.alt = '';
       image.className = 'tile-expander-image';
       media.appendChild(image);
@@ -216,16 +223,27 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     if (imageUrl) {
       bindBannerFade(top, content);
     }
-    expander.style.transition = 'none';
-    setFrame(fromRect);
-    expander.getBoundingClientRect();
-    expander.style.transition = '';
+    if (instant) {
+      overlay.classList.add('open', 'expanded');
+      setFrame(toRect);
+    } else {
+      expander.style.transition = 'none';
+      setFrame(fromRect);
+      expander.getBoundingClientRect();
+      expander.style.transition = '';
+      overlay.classList.add('open');
+    }
 
-    overlay.classList.add('open');
     if (imageUrl) {
       overlay.classList.add('has-image-open');
     }
     overlay.setAttribute('aria-hidden', 'false');
+
+    if (instant) {
+      overlay.getBoundingClientRect();
+      revealInitialItemRoute();
+      return;
+    }
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -246,6 +264,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     const currentCleanupRunId = ++cleanupRunId;
     isAnimating = true;
     const toRect = activeTileElement.getBoundingClientRect();
+    const activeView = activeTileElement.closest('.view');
 
     expander.classList.add('is-collapsing');
     overlay.classList.remove('expanded');
@@ -260,6 +279,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
       overlay.classList.remove('has-image-open');
       overlay.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('tile-open');
+      clearInitialItemRoute(activeView);
       activeTileElement = null;
       isAnimating = false;
       if (typeof onClose === 'function') {

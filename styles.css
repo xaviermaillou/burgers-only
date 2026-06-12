@@ -783,6 +783,18 @@ body {
   background: #ffffff;
   color: #111111;
 }
+html.item-route-loading .topbar,
+html.item-route-loading .menu-btn,
+html.item-route-loading .views-viewport,
+html.item-route-loading .bottom-nav {
+  visibility: hidden;
+}
+html.item-route-loading .tile-overlay,
+html.item-route-loading .tile-overlay *,
+html.item-route-loading .info-reader-overlay,
+html.item-route-loading .info-reader-overlay * {
+  transition: none;
+}
 .app-shell {
   width: 100%;
   min-height: 100vh;
