@@ -6,7 +6,6 @@ import { initInfoArticleReader } from './components/InfoArticleReader.js';
 import { updateTileImageLoading } from './components/TileCollection.js';
 import { gb, initGrowthBook } from './growthbook.js';
 import { initRouter, ROUTE_VIEW_TO_TAB } from './features/router.js';
-import { initAuthController } from './features/auth-controller.js';
 import { initRestaurantsController } from './features/restaurants-controller.js';
 import { initRecipesController } from './features/recipes-controller.js';
 import { initInfosController } from './features/infos-controller.js';
@@ -231,12 +230,46 @@ routerController = initRouter({
 
 initBottomNavigation();
 
-initAuthController({
-  googleAuthButton,
-  googleAuthButtonLabel,
-  accountStatus,
-  onTrackEvent: pushDataLayerEvent
-});
+async function loadAuth({ runAction = false } = {}) {
+  if (!googleAuthButton) {
+    return;
+  }
+
+  googleAuthButton.removeEventListener('click', handleAuthClick);
+  googleAuthButton.disabled = true;
+  if (googleAuthButtonLabel) {
+    googleAuthButtonLabel.textContent = 'Connexion...';
+  }
+
+  try {
+    const { initAuthController } = await import('./features/auth-controller.js');
+    const authController = initAuthController({
+      googleAuthButton,
+      googleAuthButtonLabel,
+      accountStatus,
+      onTrackEvent: pushDataLayerEvent
+    });
+    if (runAction) {
+      await authController.handleAuthAction();
+    }
+  } catch (error) {
+    console.error('Unable to load Google authentication.', error);
+    googleAuthButton.disabled = false;
+    if (googleAuthButtonLabel) {
+      googleAuthButtonLabel.textContent = 'Continuer avec Google';
+    }
+    googleAuthButton.addEventListener('click', handleAuthClick);
+  }
+}
+
+function handleAuthClick() {
+  void loadAuth({ runAction: true });
+}
+
+googleAuthButton?.addEventListener('click', handleAuthClick);
+if (sessionStorage.getItem('burgers-only-auth-redirect-pending')) {
+  void loadAuth();
+}
 
 restaurantsController = initRestaurantsController({
   target: restaurantList,

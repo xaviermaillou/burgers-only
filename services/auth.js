@@ -2,14 +2,17 @@ import {
   GoogleAuthProvider,
   browserLocalPersistence,
   getRedirectResult,
+  getAuth,
   onAuthStateChanged,
   setPersistence,
   signInWithPopup,
   signInWithRedirect,
   signOut
 } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js';
-import { auth } from './firebase.js';
+import { app } from './firebase.js';
 
+const AUTH_REDIRECT_PENDING_KEY = 'burgers-only-auth-redirect-pending';
+const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
@@ -38,7 +41,13 @@ export async function signInWithGoogle() {
     return await signInWithPopup(auth, googleProvider);
   } catch (error) {
     if (error?.code === 'auth/popup-blocked') {
-      await signInWithRedirect(auth, googleProvider);
+      sessionStorage.setItem(AUTH_REDIRECT_PENDING_KEY, 'true');
+      try {
+        await signInWithRedirect(auth, googleProvider);
+      } catch (redirectError) {
+        sessionStorage.removeItem(AUTH_REDIRECT_PENDING_KEY);
+        throw redirectError;
+      }
       return null;
     }
 
@@ -51,7 +60,11 @@ export function observeAuthState(onChange) {
 }
 
 export async function readRedirectResult() {
-  return getRedirectResult(auth);
+  try {
+    return await getRedirectResult(auth);
+  } finally {
+    sessionStorage.removeItem(AUTH_REDIRECT_PENDING_KEY);
+  }
 }
 
 export async function signOutUser() {

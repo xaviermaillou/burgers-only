@@ -36,6 +36,10 @@ export function initAuthController({
 }) {
   let authUser = null;
   let authRequestInFlight = false;
+  let resolveAuthReady;
+  const authReady = new Promise((resolve) => {
+    resolveAuthReady = resolve;
+  });
 
   const track = (eventName, payload = {}) => {
     if (typeof onTrackEvent === 'function') {
@@ -141,28 +145,31 @@ export function initAuthController({
     });
   };
 
-  if (googleAuthButton) {
-    googleAuthButton.addEventListener('click', async () => {
-      if (authRequestInFlight) {
-        return;
-      }
+  const handleAuthAction = async () => {
+    await authReady;
+    if (authRequestInFlight) {
+      return;
+    }
 
-      authRequestInFlight = true;
-      setAccountStatus(authUser ? 'Déconnexion en cours...' : 'Connexion en cours...');
+    authRequestInFlight = true;
+    setAccountStatus(authUser ? 'Déconnexion en cours...' : 'Connexion en cours...');
+    syncAuthButton();
+
+    try {
+      if (authUser) {
+        await signOutUser();
+      } else {
+        await signInWithGoogle();
+      }
+    } catch (error) {
+      authRequestInFlight = false;
       syncAuthButton();
+      reportAuthError(error);
+    }
+  };
 
-      try {
-        if (authUser) {
-          await signOutUser();
-        } else {
-          await signInWithGoogle();
-        }
-      } catch (error) {
-        authRequestInFlight = false;
-        syncAuthButton();
-        reportAuthError(error);
-      }
-    });
+  if (googleAuthButton) {
+    googleAuthButton.addEventListener('click', handleAuthAction);
   }
 
   observeAuthState((nextUser) => {
@@ -172,6 +179,7 @@ export function initAuthController({
     authRequestInFlight = false;
     syncAuthButton();
     syncAuthDataLayer(previousUser, nextUser);
+    resolveAuthReady();
   });
 
   readRedirectResult().catch((error) => {
@@ -180,4 +188,8 @@ export function initAuthController({
 
   renderAuthState(null);
   syncAuthButton();
+
+  return {
+    handleAuthAction
+  };
 }
