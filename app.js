@@ -297,7 +297,7 @@ recipesController = initRecipesController({
   }
 });
 
-void initGrowthBook().then(applyNavPositionFromGrowthBook);
+// void initGrowthBook().then(applyNavPositionFromGrowthBook);
 routerController.applyRouteFromLocation({ replace: true });
 
 geotag.locate().then((position) => {
