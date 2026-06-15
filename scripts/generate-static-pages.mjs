@@ -107,8 +107,7 @@ async function fetchCollection(collectionName, firebaseConfig) {
   }));
 }
 
-function buildMetadata({ type, id, title, description, image, structuredData }) {
-  const route = `/${type}/${encodeURIComponent(id)}/`;
+function buildMetadata({ route, title, description, image, structuredData, openGraphType = 'article' }) {
   const canonicalUrl = `${siteUrl}${route}`;
   const absoluteImage = image ? new URL(image, `${siteUrl}/`).href : '';
   const organizationId = `${siteUrl}/#organization`;
@@ -116,11 +115,12 @@ function buildMetadata({ type, id, title, description, image, structuredData }) 
   const tags = [
     '<base href="/" />',
     `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />`,
-    '<meta property="og:type" content="article" />',
+    `<meta property="og:type" content="${escapeHtml(openGraphType)}" />`,
     `<meta property="og:site_name" content="BurgersOnly" />`,
     `<meta property="og:title" content="${escapeHtml(title)}" />`,
     `<meta property="og:description" content="${escapeHtml(description)}" />`,
-    `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`
+    `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`,
+    '<meta property="og:locale" content="fr_LU" />'
   ];
 
   if (absoluteImage) {
@@ -163,27 +163,59 @@ function buildMetadata({ type, id, title, description, image, structuredData }) 
     );
   }
 
-  return { route, tags: tags.join('\n  ') };
+  return tags.join('\n  ');
+}
+
+function stripHomepageMetadata(template) {
+  return template.replace(
+    /\s*<!-- homepage-metadata:start -->[\s\S]*?<!-- homepage-metadata:end -->/,
+    ''
+  );
 }
 
 function renderPage(template, page) {
   const pageTitle = `${page.title} | BurgersOnly`;
   const metadata = buildMetadata({
-    ...page,
-    title: pageTitle
+    route: `/${page.type}/${encodeURIComponent(page.id)}/`,
+    title: pageTitle,
+    description: page.description,
+    image: page.image,
+    structuredData: page.structuredData
   });
   const noscriptContent = page.contentHtml
     ? `<noscript><main><article><h1>${escapeHtml(page.title)}</h1>${page.contentHtml}</article></main></noscript>`
     : '';
 
-  return template
-    .replace(/\s*<script id="homepage-structured-data"[\s\S]*?<\/script>/, '')
+  return stripHomepageMetadata(template)
     .replace(
       /<meta name="description" content="[^"]*" \/>/,
       `<meta name="description" content="${escapeHtml(page.description)}" />`
     )
-    .replace('<title>BurgersOnly</title>', `${metadata.tags}\n  <title>${escapeHtml(pageTitle)}</title>`)
+    .replace('<title>BurgersOnly</title>', `${metadata}\n  <title>${escapeHtml(pageTitle)}</title>`)
     .replace('<body>', `<body>\n  ${noscriptContent}`);
+}
+
+function renderSectionPage(template, section) {
+  const route = `/${section.path}/`;
+  const pageTitle = `BurgersOnly | ${section.title}`;
+  const metadata = buildMetadata({
+    route,
+    title: pageTitle,
+    description: section.description,
+    openGraphType: 'website',
+    structuredData: {
+      '@type': 'CollectionPage',
+      name: pageTitle,
+      description: section.description
+    }
+  });
+
+  return stripHomepageMetadata(template)
+    .replace(
+      /<meta name="description" content="[^"]*" \/>/,
+      `<meta name="description" content="${escapeHtml(section.description)}" />`
+    )
+    .replace('<title>BurgersOnly</title>', `${metadata}\n  <title>${escapeHtml(pageTitle)}</title>`);
 }
 
 async function writePage(route, html) {
@@ -218,6 +250,23 @@ const ingredientNamesByReference = new Map(
 );
 const template = await readFile(join(OUTPUT_DIR, 'index.html'), 'utf8');
 const pages = [];
+const sections = [
+  {
+    path: 'restaurants',
+    title: 'Restaurants',
+    description: 'Découvrez les meilleurs restaurants de burgers au Luxembourg et trouvez les adresses sélectionnées par BurgersOnly près de chez vous.'
+  },
+  {
+    path: 'recipes',
+    title: 'Recettes',
+    description: 'Découvrez des recettes de burgers maison, leurs ingrédients et toutes les étapes pour préparer des burgers savoureux chez vous.'
+  },
+  {
+    path: 'infos',
+    title: 'Infos',
+    description: 'Retrouvez les conseils BurgersOnly pour choisir vos ingrédients, réussir la cuisson et préparer de meilleurs burgers maison.'
+  }
+];
 
 for (const restaurant of restaurants) {
   const description = truncate(
@@ -311,14 +360,20 @@ for (const info of infos) {
 }
 
 await Promise.all(
-  pages.map(async (page) => {
-    const html = renderPage(template, page);
-    await writePage(`/${page.type}/${encodeURIComponent(page.id)}/`, html);
-  })
+  [
+    ...sections.map((section) =>
+      writePage(`/${section.path}/`, renderSectionPage(template, section))
+    ),
+    ...pages.map(async (page) => {
+      const html = renderPage(template, page);
+      await writePage(`/${page.type}/${encodeURIComponent(page.id)}/`, html);
+    })
+  ]
 );
 
 const sitemapUrls = [
   `${siteUrl}/`,
+  ...sections.map((section) => `${siteUrl}/${section.path}/`),
   ...pages.map((page) => `${siteUrl}/${page.type}/${encodeURIComponent(page.id)}/`)
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

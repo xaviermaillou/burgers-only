@@ -51,6 +51,11 @@ const PAGE_TITLE_TAB_LABELS = {
 };
 
 function updatePageTitle(routeState, itemTitle = '') {
+  if (routeState?.home) {
+    document.title = PAGE_TITLE_BASE;
+    return;
+  }
+
   const tabLabel = PAGE_TITLE_TAB_LABELS[routeState?.tab] || PAGE_TITLE_TAB_LABELS.restaurants;
   const cleanItemTitle = String(itemTitle || '').trim();
   document.title = `${PAGE_TITLE_BASE} | ${cleanItemTitle || tabLabel}`;

@@ -12,6 +12,12 @@ const ROUTE_VIEW_TO_TAB = {
   infosView: 'infos'
 };
 
+const ROUTE_TAB_TO_PATH = {
+  restaurants: 'restaurants',
+  recipes: 'recipes',
+  infos: 'infos'
+};
+
 const ROUTE_ITEM_TYPE_TO_TAB = {
   restaurant: 'restaurants',
   recipe: 'recipes',
@@ -63,19 +69,23 @@ function normalizeRouteState(state) {
   const tab = normalizeRouteTab(state?.tab);
   const item = normalizeRouteItem(state?.item);
   if (!item) {
-    return { tab, item: null };
+    return {
+      tab,
+      item: null,
+      home: state?.home === true && tab === 'restaurants'
+    };
   }
 
   const routeTabForItem = ROUTE_ITEM_TYPE_TO_TAB[item.type];
   if (!routeTabForItem) {
-    return { tab, item: null };
+    return { tab, item: null, home: false };
   }
 
   if (routeTabForItem !== tab) {
-    return { tab: routeTabForItem, item };
+    return { tab: routeTabForItem, item, home: false };
   }
 
-  return { tab, item };
+  return { tab, item, home: false };
 }
 
 function isSameRouteState(left, right) {
@@ -87,7 +97,7 @@ function isSameRouteState(left, right) {
   }
 
   if (!leftItem && !rightItem) {
-    return true;
+    return left?.home === right?.home;
   }
 
   if (!leftItem || !rightItem) {
@@ -100,6 +110,7 @@ function isSameRouteState(left, right) {
 function parseRouteStateFromLocation() {
   const params = new URLSearchParams(window.location.search);
   const explicitTab = params.get('tab');
+  const sectionMatch = window.location.pathname.match(/^\/(restaurants|recipes|infos)\/?$/);
   let item = null;
 
   const restaurantId = params.get('restaurant');
@@ -129,10 +140,13 @@ function parseRouteStateFromLocation() {
     }
   }
 
-  const inferredTab = item ? ROUTE_ITEM_TYPE_TO_TAB[item.type] : 'restaurants';
+  const inferredTab = item
+    ? ROUTE_ITEM_TYPE_TO_TAB[item.type]
+    : sectionMatch?.[1] || 'restaurants';
   return normalizeRouteState({
     tab: explicitTab || inferredTab,
-    item
+    item,
+    home: !item && !explicitTab && window.location.pathname === '/'
   });
 }
 
@@ -147,11 +161,10 @@ function buildRouteUrl(nextRouteState) {
     if (pathName) {
       url.pathname = `/${pathName}/${encodeURIComponent(normalized.item.id)}/`;
     }
-  } else {
+  } else if (normalized.home) {
     url.pathname = '/';
-    if (normalized.tab !== 'restaurants') {
-      url.searchParams.set('tab', normalized.tab);
-    }
+  } else {
+    url.pathname = `/${ROUTE_TAB_TO_PATH[normalized.tab]}/`;
   }
 
   const query = url.searchParams.toString();
@@ -202,7 +215,8 @@ export function initRouter({
 
   let routeState = {
     tab: 'restaurants',
-    item: null
+    item: null,
+    home: true
   };
   let pendingRouteItem = null;
   let restaurantsLoaded = false;
@@ -274,7 +288,8 @@ export function initRouter({
     const hasItemPatch = Object.prototype.hasOwnProperty.call(patch, 'item');
     const nextRouteState = normalizeRouteState({
       tab: typeof patch.tab === 'string' ? patch.tab : routeState.tab,
-      item: hasItemPatch ? patch.item : routeState.item
+      item: hasItemPatch ? patch.item : routeState.item,
+      home: false
     });
 
     setRouteState(nextRouteState, { replace });
