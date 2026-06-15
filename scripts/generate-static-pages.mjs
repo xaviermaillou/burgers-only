@@ -177,6 +177,7 @@ function renderPage(template, page) {
     : '';
 
   return template
+    .replace(/\s*<script id="homepage-structured-data"[\s\S]*?<\/script>/, '')
     .replace(
       /<meta name="description" content="[^"]*" \/>/,
       `<meta name="description" content="${escapeHtml(page.description)}" />`

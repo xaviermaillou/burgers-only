@@ -15,7 +15,7 @@
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0d12" />
-  <meta name="description" content="Découvrez les restaurants, recettes et conseils autour du burger avec BurgersOnly." />
+  <meta name="description" content="Découvrez les meilleurs restaurants de burgers au Luxembourg, ainsi que des recettes de burgers et des conseils pour les préparer chez vous." />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="/favicon-96.png" sizes="96x96" />
@@ -32,6 +32,41 @@
         }
       }
     })();
+  </script>
+  <script id="homepage-structured-data" type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://burgersonly.lu/#organization",
+          "name": "BurgersOnly",
+          "url": "https://burgersonly.lu/"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://burgersonly.lu/#website",
+          "name": "BurgersOnly",
+          "url": "https://burgersonly.lu/",
+          "publisher": {
+            "@id": "https://burgersonly.lu/#organization"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://burgersonly.lu/#webpage",
+          "name": "BurgersOnly",
+          "url": "https://burgersonly.lu/",
+          "description": "Découvrez les meilleurs restaurants de burgers au Luxembourg, ainsi que des recettes de burgers et des conseils pour les préparer chez vous.",
+          "isPartOf": {
+            "@id": "https://burgersonly.lu/#website"
+          },
+          "about": {
+            "@id": "https://burgersonly.lu/#organization"
+          }
+        }
+      ]
+    }
   </script>
   <title>BurgersOnly</title>
   <link rel="stylesheet" href="/styles.css" />
