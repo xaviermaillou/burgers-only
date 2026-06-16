@@ -61,7 +61,17 @@ export function initRecipesController({
         size: mapTileSizeToClass(recipe.size),
         expandedBody: recipe.overview,
         expandedList: recipe.ingredients.map((ingredient) => ingredient.name).filter(Boolean),
+        expandedIngredients: recipe.ingredients
+          .filter((ingredient) => ingredient.id && ingredient.name)
+          .map((ingredient) => ({
+            id: ingredient.id,
+            name: ingredient.name,
+            image: `/images/items/ingredients/${ingredient.id}.webp`
+          })),
         expandedSteps: recipe.steps,
+        expandedPrepTime: recipe.prepTime,
+        expandedCookTime: recipe.cookTime,
+        expandedNutrition: recipe.nutrition,
         image: recipe.image || '',
         imageWidth: recipe.imageWidth,
         maskKind: useWideMask ? 'wide' : 'square',

@@ -21,6 +21,10 @@ function getRecipeSize(index) {
   return RECIPE_SIZE_BY_INDEX[index] || 's';
 }
 
+function normalizeNutrition(nutrition) {
+  return nutrition && typeof nutrition === 'object' ? nutrition : {};
+}
+
 async function resolveIngredient(reference) {
   if (!reference) {
     return null;
@@ -51,6 +55,9 @@ async function normalizeRecipe(doc, index) {
     imageWidth: manifestImage ? resolveItemImageWidth(COLLECTION_NAME, doc.id) : 0,
     ingredients: ingredients.filter(Boolean),
     steps: Array.isArray(data.steps) ? data.steps.filter((step) => typeof step === 'string') : [],
+    prepTime: data.prepTime || '',
+    cookTime: data.cookTime || '',
+    nutrition: normalizeNutrition(data.nutrition),
     size: getRecipeSize(index)
   };
 }

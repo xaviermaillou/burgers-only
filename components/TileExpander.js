@@ -29,6 +29,29 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     }
   };
 
+  const readObjectData = (tileElement, key) => {
+    try {
+      const parsed = JSON.parse(tileElement.dataset[key] || '{}');
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const formatDuration = (value) => {
+    const match = String(value || '').match(/^PT(?:(\d+)H)?(?:(\d+)M)?$/);
+    if (!match) {
+      return String(value || '').trim();
+    }
+
+    const hours = Number(match[1] || 0);
+    const minutes = Number(match[2] || 0);
+    return [
+      hours ? `${hours} h` : '',
+      minutes ? `${minutes} min` : ''
+    ].filter(Boolean).join(' ');
+  };
+
   const uppercaseFirst = (value) => {
     const text = String(value || '');
     return text ? `${text.charAt(0).toLocaleUpperCase()}${text.slice(1)}` : '';
@@ -132,7 +155,11 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     expander.className = `${tileElement.className} tile-expander`;
     const titleText = tileElement.querySelector('.tile-title')?.textContent || '';
     const expandedList = readArrayData(tileElement, 'expandedList');
+    const expandedIngredients = readArrayData(tileElement, 'expandedIngredients');
     const expandedSteps = readArrayData(tileElement, 'expandedSteps');
+    const expandedNutrition = readObjectData(tileElement, 'expandedNutrition');
+    const prepTime = formatDuration(tileElement.dataset.expandedPrepTime);
+    const cookTime = formatDuration(tileElement.dataset.expandedCookTime);
     const content = document.createElement('div');
     content.className = 'tile-expander-content';
     const imageUrl = tileElement.dataset.image || '';
@@ -167,6 +194,31 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
     const bottom = document.createElement('div');
     bottom.className = 'tile-expander-bottom';
 
+    if (prepTime || cookTime) {
+      const timings = document.createElement('dl');
+      timings.className = 'tile-expanded-timings';
+
+      [
+        ['Préparation', prepTime],
+        ['Cuisson', cookTime]
+      ].forEach(([label, value]) => {
+        if (!value) {
+          return;
+        }
+
+        const item = document.createElement('div');
+        item.className = 'tile-expanded-timing';
+        const term = document.createElement('dt');
+        term.textContent = label;
+        const detail = document.createElement('dd');
+        detail.textContent = value;
+        item.append(term, detail);
+        timings.appendChild(item);
+      });
+
+      top.appendChild(timings);
+    }
+
     if (tileElement.dataset.expandedBody) {
       const body = document.createElement('p');
       body.className = 'tile-expanded-body';
@@ -174,7 +226,7 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
       top.appendChild(body);
     }
 
-    if (expandedList.length) {
+    if (expandedIngredients.length || expandedList.length) {
       const ingredientsTitle = document.createElement('h2');
       ingredientsTitle.className = 'tile-expanded-heading';
       ingredientsTitle.textContent = 'Ingrédients';
@@ -183,9 +235,25 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
       const list = document.createElement('ul');
       list.className = 'tile-expanded-list tile-expanded-ingredients';
 
-      expandedList.forEach((item) => {
+      const ingredients = expandedIngredients.length
+        ? expandedIngredients
+        : expandedList.map((name) => ({ name }));
+
+      ingredients.forEach((item) => {
         const listItem = document.createElement('li');
-        listItem.textContent = uppercaseFirst(item);
+        if (item.image) {
+          const image = document.createElement('img');
+          image.src = item.image;
+          image.alt = '';
+          image.className = 'tile-expanded-ingredient-image';
+          image.loading = 'lazy';
+          image.decoding = 'async';
+          listItem.appendChild(image);
+        }
+
+        const label = document.createElement('span');
+        label.textContent = uppercaseFirst(item.name);
+        listItem.appendChild(label);
         list.appendChild(listItem);
       });
 
@@ -208,6 +276,39 @@ export function initTileExpander({ overlay, expander, closeButton, inset = 12, o
       });
 
       top.appendChild(steps);
+    }
+
+    const nutritionEntries = [
+      ['Portion', expandedNutrition.servingSize],
+      ['Calories', expandedNutrition.calories],
+      ['Lipides', expandedNutrition.fatContent],
+      ['Graisses saturées', expandedNutrition.saturatedFatContent],
+      ['Glucides', expandedNutrition.carbohydrateContent],
+      ['Sucres', expandedNutrition.sugarContent],
+      ['Protéines', expandedNutrition.proteinContent],
+      ['Fibres', expandedNutrition.fiberContent],
+      ['Sodium', expandedNutrition.sodiumContent]
+    ].filter(([, value]) => value);
+
+    if (nutritionEntries.length) {
+      const nutritionTitle = document.createElement('h2');
+      nutritionTitle.className = 'tile-expanded-heading';
+      nutritionTitle.textContent = 'Nutrition';
+      top.appendChild(nutritionTitle);
+
+      const nutrition = document.createElement('dl');
+      nutrition.className = 'tile-expanded-nutrition';
+      nutritionEntries.forEach(([label, value]) => {
+        const item = document.createElement('div');
+        item.className = 'tile-expanded-nutrition-item';
+        const term = document.createElement('dt');
+        term.textContent = label;
+        const detail = document.createElement('dd');
+        detail.textContent = value;
+        item.append(term, detail);
+        nutrition.appendChild(item);
+      });
+      top.appendChild(nutrition);
     }
 
     if (titleText) {

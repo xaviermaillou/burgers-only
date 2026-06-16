@@ -236,6 +236,72 @@ function recipeDescription(recipe, ingredientNames) {
   return truncate(`Decouvrez la recette ${recipe.name} sur BurgersOnly.`);
 }
 
+function cleanString(value) {
+  const text = String(value || '').trim();
+  return text || '';
+}
+
+function buildNutrition(nutrition) {
+  if (!nutrition || typeof nutrition !== 'object') {
+    return null;
+  }
+
+  const nutritionFields = [
+    'servingSize',
+    'calories',
+    'fatContent',
+    'saturatedFatContent',
+    'unsaturatedFatContent',
+    'transFatContent',
+    'cholesterolContent',
+    'sodiumContent',
+    'carbohydrateContent',
+    'fiberContent',
+    'sugarContent',
+    'proteinContent'
+  ];
+  const entries = nutritionFields
+    .map((field) => [field, cleanString(nutrition[field])])
+    .filter(([, value]) => value);
+
+  if (!entries.length) {
+    return null;
+  }
+
+  return {
+    '@type': 'NutritionInformation',
+    ...Object.fromEntries(entries)
+  };
+}
+
+function stripFrenchArticle(value) {
+  return cleanString(value).replace(/^(le|la|les)\s+/i, '').replace(/^l['’]/i, '');
+}
+
+function buildRecipeKeywords(recipeName, ingredientNames) {
+  const title = cleanString(recipeName);
+  const titleCore = stripFrenchArticle(title);
+  const keywords = [
+    title,
+    titleCore && `burger ${titleCore}`,
+    ...ingredientNames.map(cleanString)
+  ].filter(Boolean);
+  const uniqueKeywords = [];
+  const seen = new Set();
+
+  keywords.forEach((keyword) => {
+    const key = keyword.toLocaleLowerCase();
+    if (seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    uniqueKeywords.push(keyword);
+  });
+
+  return uniqueKeywords.join(', ');
+}
+
 const firebaseConfig = await readFirebaseConfig();
 const [restaurants, recipes, ingredients] = await Promise.all([
   fetchCollection('restaurants', firebaseConfig),
@@ -310,6 +376,8 @@ for (const recipe of recipes) {
     .filter(Boolean);
   const description = recipeDescription(recipe, ingredientNames);
   const image = `/images/items/recipes/${recipe.id}.webp`;
+  const nutrition = buildNutrition(recipe.nutrition);
+  const keywords = buildRecipeKeywords(recipe.name, ingredientNames);
   pages.push({
     type: 'recipes',
     id: recipe.id,
@@ -335,6 +403,13 @@ for (const recipe of recipes) {
       description,
       image: `${siteUrl}${image}`,
       recipeIngredient: ingredientNames,
+      prepTime: cleanString(recipe.prepTime) || undefined,
+      cookTime: cleanString(recipe.cookTime) || undefined,
+      keywords: keywords || undefined,
+      recipeCuisine: cleanString(recipe.recipeCuisine) || undefined,
+      recipeCategory: 'Burger',
+      recipeYield: '1 burger',
+      nutrition: nutrition || undefined,
       recipeInstructions: (recipe.steps || []).map((text) => ({
         '@type': 'HowToStep',
         text

@@ -155,7 +155,11 @@ export function createTileItem(item, variant, onOpen, imagePriority = {}) {
   `;
   tile.dataset.expandedBody = item.expandedBody || '';
   tile.dataset.expandedList = JSON.stringify(item.expandedList || []);
+  tile.dataset.expandedIngredients = JSON.stringify(item.expandedIngredients || []);
   tile.dataset.expandedSteps = JSON.stringify(item.expandedSteps || []);
+  tile.dataset.expandedPrepTime = item.expandedPrepTime || '';
+  tile.dataset.expandedCookTime = item.expandedCookTime || '';
+  tile.dataset.expandedNutrition = JSON.stringify(item.expandedNutrition || {});
   if (item.routeId) {
     tile.dataset.routeId = item.routeId;
   }

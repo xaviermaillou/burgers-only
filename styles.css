@@ -191,6 +191,26 @@ body.geotag-hidden .location-wrap {
   line-height: 0.92;
   font-weight: 600;
 }
+.tile-expanded-timings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 0 0 14px;
+}
+.tile-expanded-timing {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #111111;
+  font-size: 0.9rem;
+  line-height: 1.1;
+}
+.tile-expanded-timing dd {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+}
 .tile-expanded-body {
   margin: 14px 0 0;
   font-size: 1.08rem;
@@ -199,8 +219,12 @@ body.geotag-hidden .location-wrap {
 }
 .tile-expanded-heading {
   margin: 24px 0 0;
-  font-size: 1.2rem;
-  line-height: 1.2;
+  font-size: 0.86rem;
+  line-height: 1.1;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888888;
 }
 .tile-expanded-list {
   margin: 10px 0 0;
@@ -216,10 +240,19 @@ body.geotag-hidden .location-wrap {
   font-size: 0.98rem;
   line-height: 1.35;
 }
-.tile-expanded-ingredients li::before {
-  content: "\2192";
-  position: absolute;
-  left: 0;
+.tile-expanded-ingredients li {
+  min-height: 30px;
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.tile-expanded-ingredient-image {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 .tile-expanded-steps {
   counter-reset: recipe-step;
@@ -228,10 +261,35 @@ body.geotag-hidden .location-wrap {
   counter-increment: recipe-step;
 }
 .tile-expanded-steps li::before {
-  content: counter(recipe-step, upper-roman);
+  content: counter(recipe-step);
   position: absolute;
   left: 0;
   font-weight: 700;
+}
+.tile-expanded-nutrition {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  color: #111111;
+  font-size: 0.9rem;
+}
+.tile-expanded-nutrition-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 6px;
+  border-bottom: 1px solid currentColor;
+}
+.tile-expanded-nutrition dt,
+.tile-expanded-nutrition dd {
+  margin: 0;
+}
+.tile-expanded-nutrition dt {
+  color: currentColor;
+}
+.tile-expanded-nutrition dd {
+  font-weight: 600;
+  text-align: right;
 }
 .restaurant-tile .tile-kicker {
   letter-spacing: 0.08em;
@@ -909,6 +967,8 @@ button,
   }
   .tile-expanded-body,
   .tile-expanded-list,
+  .tile-expanded-timing,
+  .tile-expanded-nutrition,
   .info-article p {
     color: #d6dde7;
   }
@@ -942,6 +1002,7 @@ button,
     background: #0b0d12;
   }
   .options-title,
+  .tile-expanded-heading,
   .option-group-title {
     color: #96a0ad;
   }
